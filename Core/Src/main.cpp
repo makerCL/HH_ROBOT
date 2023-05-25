@@ -25,6 +25,9 @@
 #include "string.h"
 #include "apds9960.h"
 #include "servo_driver.h"
+#include <stdio.h>
+#include "motor_driver.h"
+#include "bluetooth_driver.h"
 
 /* USER CODE END Includes */
 
@@ -60,6 +63,14 @@ UART_HandleTypeDef huart6;
 /* USER CODE BEGIN PV */
 uint8_t processing_flag = 0; // used to indicate if servo is in motion
 
+char char_in;
+char blue_char;
+char char_buff[4] = "0000";
+
+blue_drv_t blue1 = {1, &blue_char};
+
+motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
+motor_drv_t motor2 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -163,20 +174,29 @@ int main(void)
   Servo SERVO_SORT(&htim4, TIM_CHANNEL_4); // Assuming channel 1 is used for the servo
 
   // -----------------  DRIVE TASK  --------------------------------------
+  enable(&motor1);
+  enable(&motor2);
   // -----------------  NAVIGATION TASK  ---------------------------------
   // -----------------  DEADMAN TASK     ---------------------------------
+  HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
+  HAL_UART_Receive_IT(&huart2,(uint8_t*) &blue_char, 1);
+  HAL_TIM_Base_Start_IT(&htim11);
   // -----------------  MASTERMIND TASK  ---------------------------------
+  HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  setPWM(&motor1);
+	  setPWM(&motor2);
+	  comPutty(&huart1);
     /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 	  SORT_TASK(RGB_SORT, SERVO_SORT);
 	  HAL_Delay(1000);
-    /* USER CODE BEGIN 3 */
-
 
 
   }
@@ -704,6 +724,81 @@ void print(const char* message)
     HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
+	// Check which version of the UART triggered this callback
+	if(huart == &huart6){
+		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
+	}
+	if(huart == &huart1){
+		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
+		HAL_UART_Receive_IT(huart,(uint8_t*) &char_in, 1);
+		char status = (char)(blue1.status);
+		HAL_UART_Transmit(&huart2,(uint8_t*) &status, 1,1000);
+	}
+	if(huart == &huart2){
+			HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
+	}
+}
+
+// Callback: timer has rolled over
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+  // Check which version of the timer triggered this callback
+  if (htim == &htim11 ){
+	  updateStatus(&blue1);
+	  if(blue1.status == '0'){
+		  disable(&motor1);
+		  disable(&motor2);
+	  } else {
+		  enable(&motor1);
+		  enable(&motor2);
+	  }
+  }
+}
+
+void comPutty(UART_HandleTypeDef* huart){
+	if(char_in != '\0'){
+		if(char_in == '\r'){
+			char clear[2] = ""
+					"\n";
+			HAL_UART_Transmit(huart,(uint8_t*) &clear, strlen(clear),1000);
+			if(char_buff[0] == 'M'){
+				if(char_buff[1] == '1' || char_buff[1] == '2'){
+					if(((char_buff[2] >= '0' && char_buff[2] <= '9') ||
+						(char_buff[2] >= 'A' && char_buff[2] <= 'F')) &&
+					   ((char_buff[3] >= '0' && char_buff[3] <= '9') ||
+						(char_buff[3] >= 'A' && char_buff[3] <= 'F'))){
+
+						char hex_char[3] = {char_buff[2],char_buff[3]};
+						int hex_int;
+						sscanf(hex_char, "%x", &hex_int);
+						int8_t val = (int8_t)(hex_int);
+
+						if(char_buff[1] == '1'){
+							scaleNewPulse(&motor1,val);
+							char recieved[25] = "\nMOTOR1: UPDATED\n\n\r";
+							HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
+						} else {
+							char recieved[25] = "\nMOTOR2: UPDATED\n\n\r";
+							HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
+							scaleNewPulse(&motor2,val);
+						}
+					}
+				}
+			}
+			char_buff[3] = '0';
+			char_buff[2] = '0';
+			char_buff[1] = '0';
+			char_buff[0] = '0';
+		} else {
+			char_buff[0] = char_buff[1];
+			char_buff[1] = char_buff[2];
+			char_buff[2] = char_buff[3];
+			char_buff[3] = char_in;
+		}
+		char_in = '\0';
+	}
 }
 
 /* USER CODE END 4 */
