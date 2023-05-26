@@ -66,7 +66,7 @@ uint8_t processing_flag = 0; // used to indicate if servo is in motion
 
 char char_in;
 char blue_char;
-char char_buff[4] = "0000";
+char char_buff[5] = "0000";
 
 blue_drv_t blue1 = {1, &blue_char};
 
@@ -89,6 +89,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM11_Init(void);
 /* USER CODE BEGIN PFP */
 void print(const char* message);
+void comPutty(UART_HandleTypeDef* huart);
 
 
 void SORT_TASK(APDS9960& RGB_SORT, Servo& SERVO_SORT) {
