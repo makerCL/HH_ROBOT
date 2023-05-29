@@ -16,7 +16,7 @@ typedef struct blue_drv {
 	char*			blue_char_ptr;
 } blue_drv_t;
 
-void updateStatus(blue_drv_t* blue_drv);
+void updateStatusMotor(blue_drv_t* blue_drv);
 
 //void writeMessage(blue_drv_t* blue_drv);
 
