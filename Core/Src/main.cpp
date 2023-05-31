@@ -170,9 +170,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /*################# INITIALIZATION ####################################-*/
+  HAL_UART_Transmit_IT(&huart2,(uint8_t*) "GRR\r\n", strlen("GRR\r\n"));
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart1);
+  APDS9960 RGB_SORT(&hi2c1, &huart2);
   RGB_SORT.initialize();
   // Create a Servo object
   Servo SERVO_SORT(&htim4, TIM_CHANNEL_4); // Assuming channel 1 is used for the servo
@@ -191,13 +192,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  setPWM(&motor1);
-	  setPWM(&motor2);
-	  comPutty(&huart1);
+	  //setPWM(&motor1);
+	  //setPWM(&motor2);
+	  //comPutty(&huart1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  //SORT_TASK(RGB_SORT, SERVO_SORT);
+	  SORT_TASK(RGB_SORT, SERVO_SORT);
 
 
   }
@@ -644,7 +645,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
