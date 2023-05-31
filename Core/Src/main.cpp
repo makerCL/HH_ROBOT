@@ -27,7 +27,7 @@
 #include "servo_driver.h"
 #include <stdio.h>
 #include "motor_driver.h"
-#include "bluetooth_driver.h"
+#include "bluetooth_driver_motor.h"
 
 /* USER CODE END Includes */
 
@@ -65,10 +65,9 @@ UART_HandleTypeDef huart6;
 uint8_t processing_flag = 0; // used to indicate if servo is in motion
 
 char char_in;
-char blue_char;
 char char_buff[5] = "0000";
 
-blue_drv_t blue1 = {'1', '0', &blue_char};
+blue_drv_t blue1 = {'1', '0', "0\0\0\0\0\0\0\0\0", 9};
 
 motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
 motor_drv_t motor2 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
@@ -90,6 +89,7 @@ static void MX_TIM11_Init(void);
 /* USER CODE BEGIN PFP */
 void print(const char* message);
 void comPutty(UART_HandleTypeDef* huart);
+void BluePutty(UART_HandleTypeDef* huart);
 
 
 void SORT_TASK(APDS9960& RGB_SORT, Servo& SERVO_SORT) {
@@ -180,8 +180,8 @@ int main(void)
   // -----------------  DRIVE TASK  --------------------------------------
   // -----------------  NAVIGATION TASK  ---------------------------------
   // -----------------  DEADMAN TASK     ---------------------------------
-  HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
-  HAL_UART_Receive_IT(&huart2,(uint8_t*) &blue_char, 1);
+  HAL_UART_Receive_IT(&huart6,(uint8_t*) &(blue1.blue_char), blue1.blue_len);
+  HAL_UART_Receive_IT(&huart2,(uint8_t*) &(blue1.blue_char), blue1.blue_len);
   HAL_TIM_Base_Start_IT(&htim11);
   // -----------------  MASTERMIND TASK  ---------------------------------
   HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
@@ -761,7 +761,7 @@ void print(const char* message)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
 	if(huart == &huart6){
-		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
+		HAL_UART_Receive_IT(huart,(uint8_t*) &(blue1.blue_char), blue1.blue_len);
 	}
 	if(huart == &huart1){
 		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
@@ -770,7 +770,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 		HAL_UART_Transmit(&huart2,(uint8_t*) &status, 1,1000);
 	}
 	if(huart == &huart2){
-			HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
+		HAL_UART_Receive_IT(huart,(uint8_t*) &(blue1.blue_char), blue1.blue_len);
 	}
 }
 
@@ -778,7 +778,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   // Check which version of the timer triggered this callback
   if (htim == &htim11 ){
-	  updateStatus(&blue1);
+	  updateStatusMotor(&blue1);
+	  BluePutty(&huart1);
 	  if(blue1.status == '0' && blue1.cur_state == '1'){
 		  disable(&motor1);
 		  disable(&motor2);
@@ -788,32 +789,35 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		  enable(&motor2);
 		  blue1.cur_state = '1';
 	  }
+	  HAL_UART_Receive_IT(&huart2,(uint8_t*) &(blue1.blue_char), blue1.blue_len);
+	  blue1.blue_char[0] = '0';
+	  blue1.blue_char[1] = '\0';
+	  blue1.blue_char[2] = '\0';
+	  blue1.blue_char[3] = '\0';
   }
 }
 
 void BluePutty(UART_HandleTypeDef* huart){
-	if(blue_char != '0'){
-		if(char_buff[0] == 'M'){
-			if(char_buff[1] == '1' || char_buff[1] == '2'){
-				if(((char_buff[2] >= '0' && char_buff[2] <= '9') ||
-					(char_buff[2] >= 'A' && char_buff[2] <= 'F')) &&
-				   ((char_buff[3] >= '0' && char_buff[3] <= '9') ||
-					(char_buff[3] >= 'A' && char_buff[3] <= 'F'))){
+	if(blue1.blue_char[0] == 'M'){
+		if(blue1.blue_char[1] == '1' || blue1.blue_char[1] == '2'){
+			if(((blue1.blue_char[2] >= '0' && blue1.blue_char[2] <= '9') ||
+				(blue1.blue_char[2] >= 'A' && blue1.blue_char[2] <= 'F')) &&
+			   ((blue1.blue_char[3] >= '0' && blue1.blue_char[3] <= '9') ||
+				(blue1.blue_char[3] >= 'A' && blue1.blue_char[3] <= 'F'))){
 
-					char hex_char[3] = {char_buff[2],char_buff[3]};
-					int hex_int;
-					sscanf(hex_char, "%x", &hex_int);
-					int8_t val = (int8_t)(hex_int);
+				char hex_char[3] = {blue1.blue_char[2],blue1.blue_char[3]};
+				int hex_int;
+				sscanf(hex_char, "%x", &hex_int);
+				int8_t val = (int8_t)(hex_int);
 
-					if(char_buff[1] == '1'){
-						scaleNewPulse(&motor1,val);
-						char recieved[25] = "\nMOTOR1: UPDATED\n\n\r";
-						HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
-					} else {
-						char recieved[25] = "\nMOTOR2: UPDATED\n\n\r";
-						HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
-						scaleNewPulse(&motor2,val);
-					}
+				if(blue1.blue_char[1] == '1'){
+					scaleNewPulse(&motor1,val);
+					char recieved[25] = "\nMOTOR1: UPDATED\n\n\r";
+					HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
+				} else {
+					char recieved[25] = "\nMOTOR2: UPDATED\n\n\r";
+					HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
+					scaleNewPulse(&motor2,val);
 				}
 			}
 		}

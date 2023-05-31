@@ -13,7 +13,8 @@
 typedef struct blue_drv {
 	char            status;
 	char			cur_state;
-	char*			blue_char_ptr;
+	char		    blue_char[10];
+	uint16_t 		blue_len;
 } blue_drv_t;
 
 void updateStatusMotor(blue_drv_t* blue_drv);
