@@ -4,7 +4,8 @@
 
 
 
-Servo::Servo(TIM_HandleTypeDef* timerHandle, uint32_t channel) : htim(timerHandle), timer_channel(channel){
+Servo::Servo(TIM_HandleTypeDef* PWMHandle, uint32_t channel, TIM_HandleTypeDef* StopwatchHandle) : htim(PWMHandle), timer_channel(channel), hSW(StopwatchHandle){
+	processing_flag = 0;
 	initialize();
 }
 
@@ -16,6 +17,8 @@ void Servo::initialize(){
 	ARR = htim->Instance->ARR;
 
     setPulseWidth(90);
+
+    HAL_TIM_Base_Start(hSW);
 }
 
 void Servo::setPulseWidth(uint32_t position_deg) {
@@ -32,3 +35,12 @@ void Servo::setPulseWidth(uint32_t position_deg) {
 
 	  __HAL_TIM_SET_COMPARE(htim, timer_channel, compare_value);
 }
+
+void Servo::startTimer() {
+	start_time = __HAL_TIM_GetCounter(htim);
+}
+
+float Servo::elapsedTime(){
+	uint32_t end_time = __HAL_TIM_GetCounter(htim);
+	float elapsed_time = (end_time - start_time) / 1000;
+	return elapsed_time; //in ms

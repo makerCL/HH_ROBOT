@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : main.c
+  * @file           : main.cpp
   * @brief          : Main program body
   ******************************************************************************
   * @attention
@@ -23,9 +23,11 @@
 /* USER CODE BEGIN Includes */
 
 #include "string.h"
+#include <time.h>
+#include <stdio.h>
+
 #include "apds9960.h"
 #include "servo_driver.h"
-#include <stdio.h>
 #include "motor_driver.h"
 #include "bluetooth_driver.h"
 
@@ -55,6 +57,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart1;
@@ -62,7 +65,7 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
-uint8_t processing_flag = 0; // used to indicate if servo is in motion
+
 
 char char_in;
 char blue_char;
@@ -87,37 +90,64 @@ static void MX_USART1_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM11_Init(void);
+static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
 void print(const char* message);
 void comPutty(UART_HandleTypeDef* huart);
 
 
+
 void SORT_TASK(APDS9960& RGB_SORT, Servo& SERVO_SORT) {
-	  /*
-	  if (processing_flag == 1 && timer > 2 sec) {
-	  	  reset processing flag
-	  }
-	  if(ball_detected and not processing_flag) {
-	   	   run the below stuff
-	   }
-	   */
-	  RGB_SORT.readRGBC();
-	  RGB_SORT.printRGBCBuffer();
-	  if(RGB_SORT.colorSort()){
-		  processing_flag = 1;
-		  print("TRUE");
-		  SERVO_SORT.setPulseWidth(0); // 0 degrees
-		  // Start timer
-		  HAL_Delay(3000); //TODO This is blocking
-		  // if timer > 2 seconds
-		  SERVO_SORT.setPulseWidth(90); // 90 degrees
-		  //reset timer
-		  //processing = flag = 0;
-	  } else {
-		  print("FALSE");
-		  //SERVO_SORT.setPulseWidth(180); // 180 degrees
-	  }
+
+	RGB_SORT.readRGBC();
+
+	if (SERVO_SORT.processing_flag == 1) {
+		//State 1: Sensing
+		if (RGB_SORT.ballDetect()) {
+			SERVO_SORT.startTimer();
+			SERVO_SORT.processing_flag = 2;
+			print("Ball Detected");
+		}
+		RGB_SORT.printRGBCBuffer();
+
+	} else if (SERVO_SORT.processing_flag == 2){
+		//State 2: Processing
+
+		// Determine if ball should be kept
+		if (RGB_SORT.colorSort()) { //if ball is our color
+			SERVO_SORT.setPulseWidth(0); // coral
+			print("Target Ball Acquired! Storing...");
+		} else {
+			SERVO_SORT.setPulseWidth(180); // reject
+			print("Incorrect ball... rejecting");
+		}
+
+		SERVO_SORT.processing_flag = 3;
+
+	} else if (SERVO_SORT.processing_flag == 3) {
+		//State 3: Sort Movement
+		if (SERVO_SORT.elapsedTime() > 2000 ){
+			SERVO_SORT.startTimer();
+			SERVO_SORT.processing_flag = 4;
+			print("Resetting");
+		}
+
+	} else if (SERVO_SORT.processing_flag == 4) {
+		//State 4: resetting
+		SERVO_SORT.setPulseWidth(90); // 90 degrees
+
+		if (SERVO_SORT.elapsedTime() > 2000 ){
+			SERVO_SORT.startTimer();
+			SERVO_SORT.processing_flag = 1;
+			print("Ready for new ball!");
+		}
+	}
+
+	print("");
+
 }
+
+
 
 void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, UART_HandleTypeDef* huart) {
 	  setPWM(motor1);
@@ -170,15 +200,17 @@ int main(void)
   MX_USART6_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM11_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
   /*################# INITIALIZATION ####################################-*/
+  print("INIALIZATION...");
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart2);
-  RGB_SORT.initialize();
+  APDS9960 RGB_SORT(&hi2c1, &huart1);
+  RGB_SORT.ATIME = 250; //change sensor read time to adjust for lighting conditions
   // Create a Servo object
-  Servo SERVO_SORT(&htim4, TIM_CHANNEL_4); // Assuming channel 1 is used for the servo
+  Servo SERVO_SORT(&htim4, TIM_CHANNEL_4, &htim5); // Assuming channel 1 is used for the servo
 
   // -----------------  DRIVE TASK  --------------------------------------
   // -----------------  NAVIGATION TASK  ---------------------------------
@@ -192,12 +224,18 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+
   while (1)
   {
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+
+
 	  SORT_TASK(RGB_SORT, SERVO_SORT);
 	  //MOTOR_TASK(&motor1, &motor2, &huart1);
 	  HAL_Delay(1000);
@@ -567,6 +605,51 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void)
+{
+
+  /* USER CODE BEGIN TIM5_Init 0 */
+
+  /* USER CODE END TIM5_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM5_Init 1 */
+
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 95;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 4294967295;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+
+  /* USER CODE END TIM5_Init 2 */
+
+}
+
+/**
   * @brief TIM11 Initialization Function
   * @param None
   * @retval None
@@ -646,7 +729,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -755,7 +838,7 @@ void print(const char* message)
     strcpy(completeMessage, message);
     strcat(completeMessage, "\r\n");
 
-    HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
 }
