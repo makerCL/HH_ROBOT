@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include "motor_driver.h"
 #include "bluetooth_driver.h"
+#include "line_driver.h"
 
 /* USER CODE END Includes */
 
@@ -69,6 +70,9 @@ char blue_char;
 char char_buff[5] = "0000";
 
 blue_drv_t blue1 = {'1', '0', &blue_char};
+
+line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
+line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 
 motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
 motor_drv_t motor2 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
@@ -191,9 +195,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  /*
 	  setPWM(&motor1);
 	  setPWM(&motor2);
-	  comPutty(&huart1);
+	  comPutty(&huart1);*/
+
+
+	  //print("HELLO WORLD");
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -677,7 +685,7 @@ static void MX_USART6_UART_Init(void)
 
   /* USER CODE END USART6_Init 1 */
   huart6.Instance = USART6;
-  huart6.Init.BaudRate = 115200;
+  huart6.Init.BaudRate = 9600;
   huart6.Init.WordLength = UART_WORDLENGTH_8B;
   huart6.Init.StopBits = UART_STOPBITS_1;
   huart6.Init.Parity = UART_PARITY_NONE;
@@ -720,11 +728,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : M3_OUTA_Pin M3_OUTB_Pin RIGHT_LINE_OUT_Pin LEFT_LINE_OUT_Pin
-                           M2_OUTB_Pin M2_OUTA_Pin */
-  GPIO_InitStruct.Pin = M3_OUTA_Pin|M3_OUTB_Pin|RIGHT_LINE_OUT_Pin|LEFT_LINE_OUT_Pin
-                          |M2_OUTB_Pin|M2_OUTA_Pin;
+  /*Configure GPIO pins : M3_OUTA_Pin M3_OUTB_Pin M2_OUTB_Pin M2_OUTA_Pin */
+  GPIO_InitStruct.Pin = M3_OUTA_Pin|M3_OUTB_Pin|M2_OUTB_Pin|M2_OUTA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : RIGHT_LINE_OUT_Pin LEFT_LINE_OUT_Pin */
+  GPIO_InitStruct.Pin = RIGHT_LINE_OUT_Pin|LEFT_LINE_OUT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -735,11 +747,17 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
   HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -753,24 +771,23 @@ void print(const char* message)
     strcpy(completeMessage, message);
     strcat(completeMessage, "\r\n");
 
-    HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
-	if(huart == &huart6){
-		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
-	}
 	if(huart == &huart1){
 		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
 		HAL_UART_Receive_IT(huart,(uint8_t*) &char_in, 1);
-		char status = (char)(blue1.status);
-		HAL_UART_Transmit(&huart2,(uint8_t*) &status, 1,1000);
+		print_Blue(&blue1, &huart1);
 	}
 	if(huart == &huart2){
-			HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
+		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
+	}
+	if(huart == &huart6){
+		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
 	}
 }
 
@@ -779,6 +796,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   // Check which version of the timer triggered this callback
   if (htim == &htim11 ){
 	  updateStatus(&blue1);
+	  // May need to move if stantement as function into master mind task
 	  if(blue1.status == '0' && blue1.cur_state == '1'){
 		  disable(&motor1);
 		  disable(&motor2);
@@ -791,7 +809,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   }
 }
 
-void BluePutty(UART_HandleTypeDef* huart){
+void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
+	if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
+		update_Line(&lineR);
+		print_LineF(&lineR, &huart1);
+	}
+	else if (GPIO_Pin == LEFT_LINE_OUT_Pin){
+		update_Line(&lineL);
+		print_LineF(&lineL, &huart1);
+	}
+}
+
+/*void BluePutty(UART_HandleTypeDef* huart){
 	if(blue_char != '0'){
 		if(char_buff[0] == 'M'){
 			if(char_buff[1] == '1' || char_buff[1] == '2'){
@@ -818,9 +847,9 @@ void BluePutty(UART_HandleTypeDef* huart){
 			}
 		}
 	}
-}
+}*/
 
-void comPutty(UART_HandleTypeDef* huart){
+/*void comPutty(UART_HandleTypeDef* huart){
 	if(char_in != '\0'){
 		if(char_in == '\r'){
 			char clear[2] = ""
@@ -862,7 +891,7 @@ void comPutty(UART_HandleTypeDef* huart){
 		}
 		char_in = '\0';
 	}
-}
+}*/
 
 /* USER CODE END 4 */
 
