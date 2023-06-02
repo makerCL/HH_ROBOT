@@ -121,9 +121,12 @@ void SORT_TASK(APDS9960& RGB_SORT, Servo& SERVO_SORT) {
 		  print("FALSE");
 		  //SERVO_SORT.setPulseWidth(180); // 180 degrees
 	  }
+}
 
-
-
+void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, UART_HandleTypeDef* huart) {
+	  setPWM(motor1);
+	  setPWM(motor2);
+	  comPutty(huart);
 }
 
 /* USER CODE END PFP */
@@ -176,7 +179,7 @@ int main(void)
   /*################# INITIALIZATION ####################################-*/
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart1);
+  APDS9960 RGB_SORT(&hi2c1, &huart2);
   RGB_SORT.initialize();
   // Create a Servo object
   Servo SERVO_SORT(&htim4, TIM_CHANNEL_4); // Assuming channel 1 is used for the servo
@@ -195,17 +198,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  /*
-	  setPWM(&motor1);
-	  setPWM(&motor2);
-	  comPutty(&huart1);*/
 
-
-	  //print("HELLO WORLD");
-    /* USER CODE END WHILE */
+	/* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  //SORT_TASK(RGB_SORT, SERVO_SORT);
+	  SORT_TASK(RGB_SORT, SERVO_SORT);
+	  //MOTOR_TASK(&motor1, &motor2, &huart1);
+	  //HAL_Delay(1000);
+
 
 
   }
@@ -652,7 +652,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
