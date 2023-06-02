@@ -70,6 +70,7 @@ UART_HandleTypeDef huart6;
 char char_in;
 char blue_char;
 char char_buff[5] = "0000";
+float test_time;
 
 blue_drv_t blue1 = {'1', '0', &blue_char};
 
@@ -92,58 +93,60 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM11_Init(void);
 static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
-void print(const char* message);
+void usrprint(const char* message);
+void usrprint(uint32_t value);
 void comPutty(UART_HandleTypeDef* huart);
 
 
 
-void SORT_TASK(APDS9960& RGB_SORT, Servo& SERVO_SORT) {
+void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 
-	RGB_SORT.readRGBC();
+	RGB_obj.readRGBC();
 
-	if (SERVO_SORT.processing_flag == 1) {
+	if (SERVO_obj.processing_flag == 1) {
 		//State 1: Sensing
-		if (RGB_SORT.ballDetect()) {
-			SERVO_SORT.startTimer();
-			SERVO_SORT.processing_flag = 2;
-			print("Ball Detected");
+		if (RGB_obj.ballDetect()) {
+			SERVO_obj.startTimer();
+			SERVO_obj.processing_flag = 2;
+			usrprint("Ball Detected");
 		}
-		RGB_SORT.printRGBCBuffer();
+		RGB_obj.printRGBCBuffer();
 
-	} else if (SERVO_SORT.processing_flag == 2){
+	} else if (SERVO_obj.processing_flag == 2){
 		//State 2: Processing
 
 		// Determine if ball should be kept
-		if (RGB_SORT.colorSort()) { //if ball is our color
-			SERVO_SORT.setPulseWidth(0); // coral
-			print("Target Ball Acquired! Storing...");
+		if (RGB_obj.colorSort()) { //if ball is our color
+			SERVO_obj.setPulseWidth(0); // coral
+			usrprint("Target Ball Acquired! Storing...");
 		} else {
-			SERVO_SORT.setPulseWidth(180); // reject
-			print("Incorrect ball... rejecting");
+			SERVO_obj.setPulseWidth(180); // reject
+			usrprint("Incorrect ball... rejecting");
 		}
 
-		SERVO_SORT.processing_flag = 3;
+		SERVO_obj.processing_flag = 3;
 
-	} else if (SERVO_SORT.processing_flag == 3) {
+	} else if (SERVO_obj.processing_flag == 3) {
 		//State 3: Sort Movement
-		if (SERVO_SORT.elapsedTime() > 2000 ){
-			SERVO_SORT.startTimer();
-			SERVO_SORT.processing_flag = 4;
-			print("Resetting");
+		//usrprint(SERVO_obj.elapsedTime());
+		if (SERVO_obj.elapsedTime() > 2000 ){
+			usrprint("Position Reset");
+			SERVO_obj.startTimer();
+			SERVO_obj.processing_flag = 4;
+
 		}
 
-	} else if (SERVO_SORT.processing_flag == 4) {
+	} else if (SERVO_obj.processing_flag == 4) {
 		//State 4: resetting
-		SERVO_SORT.setPulseWidth(90); // 90 degrees
+		SERVO_obj.setPulseWidth(90); // 90 degrees
 
-		if (SERVO_SORT.elapsedTime() > 2000 ){
-			SERVO_SORT.startTimer();
-			SERVO_SORT.processing_flag = 1;
-			print("Ready for new ball!");
+		if (SERVO_obj.elapsedTime() > 2000 ){
+			SERVO_obj.startTimer();
+			SERVO_obj.processing_flag = 1;
+			usrprint("Ready for new ball!");
 		}
 	}
 
-	print("");
 
 }
 
@@ -204,10 +207,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /*################# INITIALIZATION ####################################-*/
-  print("INIALIZATION...");
+  usrprint("Initializing...");
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart1);
+  APDS9960 RGB_SORT(&hi2c1, &huart2);
   RGB_SORT.ATIME = 250; //change sensor read time to adjust for lighting conditions
   // Create a Servo object
   Servo SERVO_SORT(&htim4, TIM_CHANNEL_4, &htim5); // Assuming channel 1 is used for the servo
@@ -233,8 +236,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-
 
 	  SORT_TASK(RGB_SORT, SERVO_SORT);
 	  //MOTOR_TASK(&motor1, &motor2, &huart1);
@@ -729,7 +730,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -831,16 +832,23 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void print(const char* message)
+void usrprint(const char* message)
 {
     // Create a buffer for the complete message with \r\n
     char* completeMessage = new char[strlen(message) + 3];
     strcpy(completeMessage, message);
     strcat(completeMessage, "\r\n");
-
-    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
+}
+
+void usrprint(uint32_t value)
+{
+    char stringValue[20];
+    sprintf(stringValue, "%lu", value); // Convert uint32_t to string
+    // Print the value
+    usrprint(stringValue);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){

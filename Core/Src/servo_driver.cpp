@@ -19,6 +19,7 @@ void Servo::initialize(){
     setPulseWidth(90);
 
     HAL_TIM_Base_Start(hSW);
+    processing_flag = 1;
 }
 
 void Servo::setPulseWidth(uint32_t position_deg) {
@@ -44,3 +45,4 @@ float Servo::elapsedTime(){
 	uint32_t end_time = __HAL_TIM_GetCounter(htim);
 	float elapsed_time = (end_time - start_time) / 1000;
 	return elapsed_time; //in ms
+}

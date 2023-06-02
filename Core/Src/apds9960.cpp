@@ -1,6 +1,6 @@
 #include "APDS9960.h"
 
-APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle, TIM_HandleTypeDef* timerHandle) {
+APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle) {
 	hi2c = i2cHandle;
 	huart = uartHandle;
 	RGB_Margin = 20;
@@ -121,7 +121,7 @@ void APDS9960::printRGBCBuffer() {
 
 	  elapsed_time = (end_time - start_time) / 1000;
 	 */
-}
+
 
 
 
