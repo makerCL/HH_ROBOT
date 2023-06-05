@@ -10,10 +10,11 @@ APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle)
 	initialize();
 }
 
-void APDS9960::initialize() {
+uint8_t APDS9960::initialize() {
 	uint8_t id = readReg(0x92);
 	if (id != 0xab) {
 		HAL_UART_Transmit(huart, (uint8_t*)"RGB ID NOT FOUND", strlen("RGB ID NOT FOUND"), HAL_MAX_DELAY);
+		return 0;
 	} else {
 		HAL_UART_Transmit(huart, (uint8_t*)"RGB Sensor initialized\r\n", strlen("RGB Sensor initialized\r\n"), HAL_MAX_DELAY);
 	}
@@ -24,7 +25,9 @@ void APDS9960::initialize() {
 
 
     colorSet();
-    //TODO: calibrate ATIME
+
+    return 1;
+
 }
 
 

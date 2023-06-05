@@ -9,7 +9,7 @@ public:
 
   Servo(TIM_HandleTypeDef* PWMHandle, uint32_t channel, TIM_HandleTypeDef* StopwatchHandle);
   void initialize();
-  void setPulseWidth(uint32_t position_deg);
+  void setAngle(uint32_t position_deg);
 
   float min_pulse = 0.5; //ms
   float max_pulse = 2.5; //ms

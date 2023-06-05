@@ -6,7 +6,6 @@
 
 Servo::Servo(TIM_HandleTypeDef* PWMHandle, uint32_t channel, TIM_HandleTypeDef* StopwatchHandle) : htim(PWMHandle), timer_channel(channel), hSW(StopwatchHandle){
 	processing_flag = 0;
-	initialize();
 }
 
 void Servo::initialize(){
@@ -16,13 +15,13 @@ void Servo::initialize(){
 	prescaler = htim->Init.Prescaler;
 	ARR = htim->Instance->ARR;
 
-    setPulseWidth(90);
+    //setAngle(90);
 
     HAL_TIM_Base_Start(hSW);
     processing_flag = 1;
 }
 
-void Servo::setPulseWidth(uint32_t position_deg) {
+void Servo::setAngle(uint32_t position_deg) {
 	  // Ensure the input is within the valid range
 	  if (position_deg > max_rot) {
 		  position_deg = max_rot;

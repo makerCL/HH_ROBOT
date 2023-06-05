@@ -14,7 +14,7 @@ public:
 
     char ball_color[13];
 
-    void initialize();
+    uint8_t initialize();
     void readRGBC();
     bool ballDetect();
     bool colorSort();

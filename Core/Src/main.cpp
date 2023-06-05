@@ -65,12 +65,16 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
+//FSM FLAGS
+uint8_t sort_flg = 0;
 
 
+//OTHER
 char char_in;
 char blue_char;
 char char_buff[5] = "0000";
 float test_time;
+
 
 blue_drv_t blue1 = {'1', '0', &blue_char};
 
@@ -100,49 +104,50 @@ void comPutty(UART_HandleTypeDef* huart);
 
 
 void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
+	if (sort_flg != 0) {
+		RGB_obj.readRGBC();
+	}
 
-	RGB_obj.readRGBC();
-
-	if (SERVO_obj.processing_flag == 1) {
+	if (sort_flg == 1) {
 		//State 1: Sensing
 		if (RGB_obj.ballDetect()) {
 			SERVO_obj.startTimer();
-			SERVO_obj.processing_flag = 2;
+			sort_flg = 2;
 			usrprint("Ball Detected");
 		}
 		RGB_obj.printRGBCBuffer();
 
-	} else if (SERVO_obj.processing_flag == 2){
+	} else if (sort_flg == 2){
 		//State 2: Processing
 
 		// Determine if ball should be kept
 		if (RGB_obj.colorSort()) { //if ball is our color
-			SERVO_obj.setPulseWidth(0); // coral
+			SERVO_obj.setAngle(0); // coral
 			usrprint("Target Ball Acquired! Storing...");
 		} else {
-			SERVO_obj.setPulseWidth(180); // reject
+			SERVO_obj.setAngle(180); // reject
 			usrprint("Incorrect ball... rejecting");
 		}
 
-		SERVO_obj.processing_flag = 3;
+		sort_flg = 3;
 
-	} else if (SERVO_obj.processing_flag == 3) {
+	} else if (sort_flg == 3) {
 		//State 3: Sort Movement
 		//usrprint(SERVO_obj.elapsedTime());
 		if (SERVO_obj.elapsedTime() > 2000 ){
 			usrprint("Position Reset");
 			SERVO_obj.startTimer();
-			SERVO_obj.processing_flag = 4;
+			sort_flg = 4;
 
 		}
 
-	} else if (SERVO_obj.processing_flag == 4) {
+	} else if (sort_flg == 4) {
 		//State 4: resetting
-		SERVO_obj.setPulseWidth(90); // 90 degrees
+		SERVO_obj.setAngle(90); // 90 degrees
 
 		if (SERVO_obj.elapsedTime() > 2000 ){
 			SERVO_obj.startTimer();
-			SERVO_obj.processing_flag = 1;
+			sort_flg = 1;
 			usrprint("Ready for new ball!");
 		}
 	}
@@ -156,6 +161,24 @@ void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, UART_HandleTypeDef* hu
 	  setPWM(motor1);
 	  setPWM(motor2);
 	  comPutty(huart);
+}
+
+void CORRAL_TASK(Servo& CORRAL_SERVO) {
+	if (CORRAL_SERVO.processing_flag == 0) {
+		CORRAL_SERVO.setAngle(0);
+	} else if (CORRAL_SERVO.processing_flag == 1) {
+		CORRAL_SERVO.setAngle(90);
+	}
+
+}
+
+void MASTERMIND_TASK (Servo& CORRAL_SERVO) {
+	if (CORRAL_SERVO.processing_flag == 0) {
+			CORRAL_SERVO.processing_flag = 1;
+	} else if (CORRAL_SERVO.processing_flag == 1) {
+		CORRAL_SERVO.processing_flag = 0;
+	}
+
 }
 
 /* USER CODE END PFP */
@@ -210,10 +233,13 @@ int main(void)
   usrprint("Initializing...");
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart2);
+  APDS9960 RGB_SORT(&hi2c1, &huart1);
+  sort_flg = RGB_SORT.initialize();
   RGB_SORT.ATIME = 250; //change sensor read time to adjust for lighting conditions
   // Create a Servo object
-  Servo SERVO_SORT(&htim4, TIM_CHANNEL_4, &htim5); // Assuming channel 1 is used for the servo
+  Servo SERVO_SORT(&htim4, TIM_CHANNEL_3, &htim5);
+
+
 
   // -----------------  DRIVE TASK  --------------------------------------
   // -----------------  NAVIGATION TASK  ---------------------------------
@@ -221,13 +247,16 @@ int main(void)
   HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
   HAL_UART_Receive_IT(&huart2,(uint8_t*) &blue_char, 1);
   HAL_TIM_Base_Start_IT(&htim11);
+  // -----------------  CORRAL TASK     ---------------------------------
+  Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_4, &htim5);
+  SERVO_CORRAL.max_rot = 270;
+  SERVO_CORRAL.setAngle(90); //start in upright position TODO: move to mastermind at some point
   // -----------------  MASTERMIND TASK  ---------------------------------
   HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
 
 
   while (1)
@@ -237,8 +266,10 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+      //MOTOR_TASK(&motor1, &motor2, &huart1);
 	  SORT_TASK(RGB_SORT, SERVO_SORT);
-	  //MOTOR_TASK(&motor1, &motor2, &huart1);
+	  CORRAL_TASK(SERVO_CORRAL);
+	  MASTERMIND_TASK(SERVO_CORRAL);
 	  HAL_Delay(1000);
 
   }
@@ -838,7 +869,7 @@ void usrprint(const char* message)
     char* completeMessage = new char[strlen(message) + 3];
     strcpy(completeMessage, message);
     strcat(completeMessage, "\r\n");
-    HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
 }
