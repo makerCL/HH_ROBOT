@@ -275,7 +275,6 @@ int main(void)
 	  CORRAL_TASK(SERVO_CORRAL);
 	  MASTERMIND_TASK(SERVO_CORRAL);
 	  HAL_Delay(1000);
-	  SORT_TASK(RGB_SORT, SERVO_SORT);
 	  //MOTOR_TASK(&motor1, &motor2, &huart1);
 	  //HAL_Delay(1000);
 
