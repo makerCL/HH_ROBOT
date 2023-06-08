@@ -9,6 +9,7 @@
 #define INC_BLUETOOTH_DRIVER_H_
 
 #include "stdint.h"
+#include "stm32f4xx_hal.h"
 
 typedef struct blue_drv {
 	char            status;
@@ -18,6 +19,6 @@ typedef struct blue_drv {
 
 void updateStatus(blue_drv_t* blue_drv);
 
-//void writeMessage(blue_drv_t* blue_drv);
+void print_Blue(blue_drv_t* blue_drv, UART_HandleTypeDef* huart);
 
 #endif /* INC_BLUETOOTH_DRIVER_H_ */
