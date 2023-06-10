@@ -29,6 +29,7 @@
 #include "motor_driver.h"
 #include "bluetooth_driver.h"
 #include "line_driver.h"
+#include "encoder_driver.h"
 
 /* USER CODE END Includes */
 
@@ -59,7 +60,6 @@ TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
@@ -71,11 +71,14 @@ char char_buff[5] = "0000";
 
 blue_drv_t blue1 = {'1', '0', &blue_char};
 
-line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
+//line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
 line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 
 motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
 motor_drv_t motor2 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
+encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, &htim11, 16);
+encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, &htim11, 16);
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,7 +92,6 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART6_UART_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_TIM11_Init(void);
 /* USER CODE BEGIN PFP */
 void print(const char* message);
@@ -172,14 +174,13 @@ int main(void)
   MX_TIM4_Init();
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
-  MX_USART2_UART_Init();
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
 
   /*################# INITIALIZATION ####################################-*/
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart2);
+  APDS9960 RGB_SORT(&hi2c1, &huart1);
   RGB_SORT.initialize();
   // Create a Servo object
   Servo SERVO_SORT(&htim4, TIM_CHANNEL_4); // Assuming channel 1 is used for the servo
@@ -188,7 +189,7 @@ int main(void)
   // -----------------  NAVIGATION TASK  ---------------------------------
   // -----------------  DEADMAN TASK     ---------------------------------
   HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
-  HAL_UART_Receive_IT(&huart2,(uint8_t*) &blue_char, 1);
+  //HAL_UART_Receive_IT(&huart2,(uint8_t*) &blue_char, 1);
   HAL_TIM_Base_Start_IT(&htim11);
   // -----------------  MASTERMIND TASK  ---------------------------------
   HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
@@ -199,11 +200,11 @@ int main(void)
   while (1)
   {
 
-	/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  SORT_TASK(RGB_SORT, SERVO_SORT);
-	  //MOTOR_TASK(&motor1, &motor2, &huart1);
+	  //SORT_TASK(RGB_SORT, SERVO_SORT);
+	  MOTOR_TASK(&motor1, &motor2, &huart1);
 	  //HAL_Delay(1000);
 
 
@@ -637,39 +638,6 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
   * @brief USART6 Initialization Function
   * @param None
   * @retval None
@@ -721,6 +689,12 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
+  /*Configure GPIO pins : M1_OUTA_Pin M1_OUTB_Pin */
+  GPIO_InitStruct.Pin = M1_OUTA_Pin|M1_OUTB_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -728,14 +702,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : M3_OUTA_Pin M3_OUTB_Pin M2_OUTB_Pin M2_OUTA_Pin */
-  GPIO_InitStruct.Pin = M3_OUTA_Pin|M3_OUTB_Pin|M2_OUTB_Pin|M2_OUTA_Pin;
+  /*Configure GPIO pins : M3_OUTA_Pin M3_OUTB_Pin */
+  GPIO_InitStruct.Pin = M3_OUTA_Pin|M3_OUTB_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RIGHT_LINE_OUT_Pin LEFT_LINE_OUT_Pin */
-  GPIO_InitStruct.Pin = RIGHT_LINE_OUT_Pin|LEFT_LINE_OUT_Pin;
+  /*Configure GPIO pins : LEFT_LINE_OUT_Pin M2_OUTB_Pin M2_OUTA_Pin */
+  GPIO_InitStruct.Pin = LEFT_LINE_OUT_Pin|M2_OUTB_Pin|M2_OUTA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -749,6 +723,9 @@ static void MX_GPIO_Init(void)
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
   HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_IRQn);
@@ -782,10 +759,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
 		HAL_UART_Receive_IT(huart,(uint8_t*) &char_in, 1);
 		print_Blue(&blue1, &huart1);
-	}
+	}/*
 	if(huart == &huart2){
 		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
-	}
+	}*/
 	if(huart == &huart6){
 		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
 	}
@@ -810,13 +787,31 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 }
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
-	if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
+	/*if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
 		update_Line(&lineR);
 		print_LineF(&lineR, &huart1);
-	}
-	else if (GPIO_Pin == LEFT_LINE_OUT_Pin){
+	}*/
+	if (GPIO_Pin == LEFT_LINE_OUT_Pin){
 		update_Line(&lineL);
 		print_LineF(&lineL, &huart1);
+	}
+	else if (GPIO_Pin == M1_OUTA_Pin){
+		update_encoder(&encoder1);
+	}
+	else if (GPIO_Pin == M1_OUTB_Pin){
+		update_encoder(&encoder1);
+	}
+	else if (GPIO_Pin == M2_OUTA_Pin){
+		update_encoder(&encoder2);
+		char str[25];
+		sprintf(str, "Encoder2: %d", encoder2.TOTAL_COUNT);
+		print(str);
+	}
+	else if (GPIO_Pin == M2_OUTB_Pin){
+		update_encoder(&encoder2);
+		char str[25];
+		sprintf(str, "Encoder2: %d", encoder2.TOTAL_COUNT);
+		print(str);
 	}
 }
 
@@ -849,7 +844,7 @@ void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
 	}
 }*/
 
-/*void comPutty(UART_HandleTypeDef* huart){
+void comPutty(UART_HandleTypeDef* huart){
 	if(char_in != '\0'){
 		if(char_in == '\r'){
 			char clear[2] = ""
@@ -891,7 +886,7 @@ void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
 		}
 		char_in = '\0';
 	}
-}*/
+}
 
 /* USER CODE END 4 */
 

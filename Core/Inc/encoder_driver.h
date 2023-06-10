@@ -1,0 +1,49 @@
+/*
+ * encoder_driver.h
+ *
+ *  Created on: Jun 2, 2023
+ *      Author: johna
+ */
+
+#ifndef INC_ENCODER_DRIVER_H_
+#define INC_ENCODER_DRIVER_H_
+
+#include "stdint.h"
+#include "stm32f4xx_hal.h"
+
+typedef struct encoder_drv {
+	int32_t             TOTAL_COUNT;
+	uint8_t				LAST_COUNT;
+
+	uint16_t			GPIO_Pin1;
+	GPIO_TypeDef*		GPIOx1;
+	uint16_t			GPIO_Pin2;
+	GPIO_TypeDef*		GPIOx2;
+
+	TIM_HandleTypeDef*	htim;
+	uint16_t			TIME_LAST;
+
+	int32_t             TPR;
+	int8_t				pos;
+	int8_t				vel;
+} encoder_drv_t;
+
+encoder_drv_t init_encoder(uint16_t	GPIO_Pin1, GPIO_TypeDef* GPIOx1, uint16_t GPIO_Pin2, GPIO_TypeDef* GPIOx2, TIM_HandleTypeDef* htim, int32_t TPR);
+
+void update_encoder(encoder_drv_t* encoder_drv);
+
+void zero(encoder_drv_t* encoder_drv);
+
+void print_encoder(encoder_drv_t* encoder_drv);
+
+
+
+//Private functions
+void calc_Position(encoder_drv_t* encoder_drv);
+
+void calc_Velocity_And_Timer_Update(encoder_drv_t* encoder_drv, uint16_t time);
+
+uint8_t NewState(encoder_drv_t* encoder_drv);
+
+
+#endif /* INC_ENCODER_DRIVER_H_ */
