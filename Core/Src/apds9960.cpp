@@ -5,14 +5,16 @@ APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle)
 	huart = uartHandle;
 	RGB_Margin = 20;
 	ATIME = 246;
-	strcpy(ball_color, "RED");
+	strcpy(ball_color, "RED"); // default team color to RED
 
+	initialize();
 }
 
-void APDS9960::initialize() {
+uint8_t APDS9960::initialize() {
 	uint8_t id = readReg(0x92);
 	if (id != 0xab) {
-		HAL_UART_Transmit(huart, (uint8_t*)"CORRECT RGB ID NOT FOUND", strlen("CORRECT RGB ID NOT FOUND"), HAL_MAX_DELAY);
+		HAL_UART_Transmit(huart, (uint8_t*)"RGB ID NOT FOUND", strlen("RGB ID NOT FOUND"), HAL_MAX_DELAY);
+		return 0;
 	} else {
 		HAL_UART_Transmit(huart, (uint8_t*)"RGB Sensor initialized\r\n", strlen("RGB Sensor initialized\r\n"), HAL_MAX_DELAY);
 	}
@@ -21,9 +23,13 @@ void APDS9960::initialize() {
     writeReg(0x90, 0b00001000); // Increase LED Strength
     writeReg(0x81, ATIME); // Set ATIME for photodiode integration time
 
+
     colorSet();
-    //TODO: calibrate ATIME
+
+    return 1;
+
 }
+
 
 void APDS9960::readRGBC() {
     RGBC_Buffer[0] = readReg16(0x96);
@@ -31,6 +37,18 @@ void APDS9960::readRGBC() {
     RGBC_Buffer[2] = readReg16(0x9A);
     RGBC_Buffer[3] = readReg16(0x94);
 }
+
+bool APDS9960::ballDetect() {
+	readRGBC();
+
+	if (RGBC_Buffer[3] > 30) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 
 bool APDS9960::colorSort() {
     // Duplicated local copies for readability
@@ -92,3 +110,24 @@ void APDS9960::printRGBCBuffer() {
     snprintf(buffer, sizeof(buffer), "R: %u, G: %u, B: %u, C: %u\r\n", RGBC_Buffer[0], RGBC_Buffer[1], RGBC_Buffer[2], RGBC_Buffer[3]);
     HAL_UART_Transmit(huart, (uint8_t*)(buffer), strlen(buffer), HAL_MAX_DELAY);
 }
+
+
+	/*
+	 *
+	  HAL_TIM_Base_Start(&htim5);
+	  start_time = __HAL_TIM_GetCounter(&htim5);
+
+	  HAL_Delay(1222);
+
+	  end_time = __HAL_TIM_GetCounter(&htim5);
+	  HAL_TIM_Base_Stop(&htim5);
+
+	  elapsed_time = (end_time - start_time) / 1000;
+	 */
+
+
+
+
+
+
+

@@ -57,17 +57,22 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
-uint8_t processing_flag = 0; // used to indicate if servo is in motion
+//FSM FLAGS
+uint8_t sort_flg = 0;
 
+
+//OTHER
 char char_in;
 char blue_char;
 char char_buff[5] = "0000";
+float test_time;
 
 blue_drv_t blue1 = {'1', '0', &blue_char};
 
@@ -77,7 +82,7 @@ line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
 motor_drv_t motor2 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
 encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, &htim11, 16);
-encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, &htim11, 16);
+encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, &htim11, 16*50);
 
 /* USER CODE END PV */
 
@@ -93,42 +98,89 @@ static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM11_Init(void);
+static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
-void print(const char* message);
+void usrprint(const char* message);
+void usrprint(uint32_t value);
 void comPutty(UART_HandleTypeDef* huart);
 
 
-void SORT_TASK(APDS9960& RGB_SORT, Servo& SERVO_SORT) {
-	  /*
-	  if (processing_flag == 1 && timer > 2 sec) {
-	  	  reset processing flag
-	  }
-	  if(ball_detected and not processing_flag) {
-	   	   run the below stuff
-	   }
-	   */
-	  RGB_SORT.readRGBC();
-	  RGB_SORT.printRGBCBuffer();
-	  if(RGB_SORT.colorSort()){
-		  processing_flag = 1;
-		  print("TRUE");
-		  SERVO_SORT.setPulseWidth(0); // 0 degrees
-		  // Start timer
-		  HAL_Delay(3000); //TODO This is blocking
-		  // if timer > 2 seconds
-		  SERVO_SORT.setPulseWidth(90); // 90 degrees
-		  //reset timer
-		  //processing = flag = 0;
-	  } else {
-		  print("FALSE");
-		  //SERVO_SORT.setPulseWidth(180); // 180 degrees
-	  }
+void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
+	if (sort_flg != 0) {
+		RGB_obj.readRGBC();
+	}
+
+	if (sort_flg == 1) {
+		//State 1: Sensing
+		if (RGB_obj.ballDetect()) {
+			SERVO_obj.startTimer();
+			sort_flg = 2;
+			usrprint("Ball Detected");
+		}
+		RGB_obj.printRGBCBuffer();
+
+	} else if (sort_flg == 2){
+		//State 2: Processing
+
+		// Determine if ball should be kept
+		if (RGB_obj.colorSort()) { //if ball is our color
+			SERVO_obj.setAngle(0); // coral
+			usrprint("Target Ball Acquired! Storing...");
+		} else {
+			SERVO_obj.setAngle(180); // reject
+			usrprint("Incorrect ball... rejecting");
+		}
+
+		sort_flg = 3;
+
+	} else if (sort_flg == 3) {
+		//State 3: Sort Movement
+		//usrprint(SERVO_obj.elapsedTime());
+		if (SERVO_obj.elapsedTime() > 2000 ){
+			usrprint("Position Reset");
+			SERVO_obj.startTimer();
+			sort_flg = 4;
+
+		}
+
+	} else if (sort_flg == 4) {
+		//State 4: resetting
+		SERVO_obj.setAngle(90); // 90 degrees
+
+		if (SERVO_obj.elapsedTime() > 2000 ){
+			SERVO_obj.startTimer();
+			sort_flg = 1;
+			usrprint("Ready for new ball!");
+		}
+	}
+
+
 }
+
+
 
 void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, UART_HandleTypeDef* huart) {
 	  setPWM(motor1);
 	  setPWM(motor2);
 	  comPutty(huart);
+}
+
+void CORRAL_TASK(Servo& CORRAL_SERVO) {
+	if (CORRAL_SERVO.processing_flag == 0) {
+		CORRAL_SERVO.setAngle(0);
+	} else if (CORRAL_SERVO.processing_flag == 1) {
+		CORRAL_SERVO.setAngle(90);
+	}
+
+}
+
+void MASTERMIND_TASK (Servo& CORRAL_SERVO) {
+	if (CORRAL_SERVO.processing_flag == 0) {
+			CORRAL_SERVO.processing_flag = 1;
+	} else if (CORRAL_SERVO.processing_flag == 1) {
+		CORRAL_SERVO.processing_flag = 0;
+	}
+
 }
 
 /* USER CODE END PFP */
@@ -175,24 +227,34 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
   MX_TIM11_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
+
   /*################# INITIALIZATION ####################################-*/
+  usrprint("Initializing...");
   // -----------------  SORT TASK  ---------------------------------
   // Color Sensor Initialization
   APDS9960 RGB_SORT(&hi2c1, &huart1);
-  RGB_SORT.initialize();
+  sort_flg = RGB_SORT.initialize();
+  RGB_SORT.ATIME = 250; //change sensor read time to adjust for lighting conditions
   // Create a Servo object
-  Servo SERVO_SORT(&htim4, TIM_CHANNEL_4); // Assuming channel 1 is used for the servo
+  Servo SERVO_SORT(&htim4, TIM_CHANNEL_3, &htim5);
+
+
 
   // -----------------  DRIVE TASK  --------------------------------------
   // -----------------  NAVIGATION TASK  ---------------------------------
   // -----------------  DEADMAN TASK     ---------------------------------
   HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
-  //HAL_UART_Receive_IT(&huart2,(uint8_t*) &blue_char, 1);
   HAL_TIM_Base_Start_IT(&htim11);
+  // -----------------  CORRAL TASK     ---------------------------------
+  Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_4, &htim5);
+  SERVO_CORRAL.max_rot = 270;
+  SERVO_CORRAL.setAngle(90); //start in upright position TODO: move to mastermind at some point
   // -----------------  MASTERMIND TASK  ---------------------------------
   HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -203,12 +265,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  //SORT_TASK(RGB_SORT, SERVO_SORT);
-	  MOTOR_TASK(&motor1, &motor2, &huart1);
-	  //HAL_Delay(1000);
-
-
-
   }
   /* USER CODE END 3 */
 }
@@ -574,6 +630,51 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void)
+{
+
+  /* USER CODE BEGIN TIM5_Init 0 */
+
+  /* USER CODE END TIM5_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM5_Init 1 */
+
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 95;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 4294967295;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+
+  /* USER CODE END TIM5_Init 2 */
+
+}
+
+/**
   * @brief TIM11 Initialization Function
   * @param None
   * @retval None
@@ -741,28 +842,36 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void print(const char* message)
+void usrprint(const char* message)
 {
     // Create a buffer for the complete message with \r\n
     char* completeMessage = new char[strlen(message) + 3];
     strcpy(completeMessage, message);
     strcat(completeMessage, "\r\n");
+    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
 }
 
+void usrprint(uint32_t value)
+{
+    char stringValue[20];
+    sprintf(stringValue, "%lu", value); // Convert uint32_t to string
+    // Print the value
+    usrprint(stringValue);
+}
+
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
 	if(huart == &huart1){
 		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
 		HAL_UART_Receive_IT(huart,(uint8_t*) &char_in, 1);
-		print_Blue(&blue1, &huart1);
-	}/*
-	if(huart == &huart2){
-		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
-	}*/
+		//print_Blue(&blue1, &huart1);
+		usrprint(encoder2.pos);
+	}
 	if(huart == &huart6){
 		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
 	}
@@ -784,6 +893,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		  blue1.cur_state = '1';
 	  }
   }
+  Update_Encoder_State(&encoder1);
+  Update_Encoder_State(&encoder2);
 }
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
@@ -795,23 +906,17 @@ void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
 		update_Line(&lineL);
 		print_LineF(&lineL, &huart1);
 	}
-	else if (GPIO_Pin == M1_OUTA_Pin){
+	else if (GPIO_Pin == M1_OUTA_Pin || GPIO_Pin == M1_OUTB_Pin){
 		update_encoder(&encoder1);
+		char str[25];
+		sprintf(str, "Encoder1: %lu", encoder1.TOTAL_COUNT);
+		usrprint(str);
 	}
-	else if (GPIO_Pin == M1_OUTB_Pin){
-		update_encoder(&encoder1);
-	}
-	else if (GPIO_Pin == M2_OUTA_Pin){
+	else if (GPIO_Pin == M2_OUTA_Pin || GPIO_Pin == M2_OUTB_Pin){
 		update_encoder(&encoder2);
 		char str[25];
-		sprintf(str, "Encoder2: %d", encoder2.TOTAL_COUNT);
-		print(str);
-	}
-	else if (GPIO_Pin == M2_OUTB_Pin){
-		update_encoder(&encoder2);
-		char str[25];
-		sprintf(str, "Encoder2: %d", encoder2.TOTAL_COUNT);
-		print(str);
+		sprintf(str, "Encoder2: %lu", encoder2.TOTAL_COUNT);
+		usrprint(str);
 	}
 }
 

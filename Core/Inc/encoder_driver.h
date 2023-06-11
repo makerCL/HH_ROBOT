@@ -13,7 +13,8 @@
 
 typedef struct encoder_drv {
 	int32_t             TOTAL_COUNT;
-	uint8_t				LAST_COUNT;
+	int32_t             LAST_COUNT;
+	uint8_t				LAST_ENCODER_COUNT;
 
 	uint16_t			GPIO_Pin1;
 	GPIO_TypeDef*		GPIOx1;
@@ -21,7 +22,7 @@ typedef struct encoder_drv {
 	GPIO_TypeDef*		GPIOx2;
 
 	TIM_HandleTypeDef*	htim;
-	uint16_t			TIME_LAST;
+	uint16_t			LAST_TIME;
 
 	int32_t             TPR;
 	int8_t				pos;
@@ -32,16 +33,11 @@ encoder_drv_t init_encoder(uint16_t	GPIO_Pin1, GPIO_TypeDef* GPIOx1, uint16_t GP
 
 void update_encoder(encoder_drv_t* encoder_drv);
 
-void zero(encoder_drv_t* encoder_drv);
-
 void print_encoder(encoder_drv_t* encoder_drv);
 
+void Update_Encoder_State(encoder_drv_t* encoder_drv);
 
-
-//Private functions
-void calc_Position(encoder_drv_t* encoder_drv);
-
-void calc_Velocity_And_Timer_Update(encoder_drv_t* encoder_drv, uint16_t time);
+void zero(encoder_drv_t* encoder_drv);
 
 uint8_t NewState(encoder_drv_t* encoder_drv);
 

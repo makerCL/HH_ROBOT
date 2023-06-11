@@ -10,12 +10,13 @@
 
 class APDS9960 {
 public:
-    APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* huart);
+    APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle);
 
     char ball_color[13];
 
-    void initialize();
+    uint8_t initialize();
     void readRGBC();
+    bool ballDetect();
     bool colorSort();
 
     void colorSet();
@@ -32,6 +33,8 @@ public:
     void writeReg(uint8_t reg, uint8_t value);
 
     void printRGBCBuffer();
+
+
 
 private:
     I2C_HandleTypeDef* hi2c;

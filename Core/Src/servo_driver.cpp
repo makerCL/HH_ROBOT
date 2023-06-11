@@ -4,8 +4,8 @@
 
 
 
-Servo::Servo(TIM_HandleTypeDef* timerHandle, uint32_t channel) : htim(timerHandle), timer_channel(channel){
-	initialize();
+Servo::Servo(TIM_HandleTypeDef* PWMHandle, uint32_t channel, TIM_HandleTypeDef* StopwatchHandle) : htim(PWMHandle), timer_channel(channel), hSW(StopwatchHandle){
+	processing_flag = 0;
 }
 
 void Servo::initialize(){
@@ -15,10 +15,13 @@ void Servo::initialize(){
 	prescaler = htim->Init.Prescaler;
 	ARR = htim->Instance->ARR;
 
-    setPulseWidth(90);
+    //setAngle(90);
+
+    HAL_TIM_Base_Start(hSW);
+    processing_flag = 1;
 }
 
-void Servo::setPulseWidth(uint32_t position_deg) {
+void Servo::setAngle(uint32_t position_deg) {
 	  // Ensure the input is within the valid range
 	  if (position_deg > max_rot) {
 		  position_deg = max_rot;
@@ -31,4 +34,14 @@ void Servo::setPulseWidth(uint32_t position_deg) {
 	  uint32_t compare_value = static_cast<uint32_t>((clock_freq / (prescaler + 1)) * pulse_width_ms / 1000);
 
 	  __HAL_TIM_SET_COMPARE(htim, timer_channel, compare_value);
+}
+
+void Servo::startTimer() {
+	start_time = __HAL_TIM_GetCounter(htim);
+}
+
+float Servo::elapsedTime(){
+	uint32_t end_time = __HAL_TIM_GetCounter(htim);
+	float elapsed_time = (end_time - start_time) / 1000;
+	return elapsed_time; //in ms
 }
