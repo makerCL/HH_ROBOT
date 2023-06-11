@@ -68,6 +68,7 @@ UART_HandleTypeDef huart6;
 uint8_t sort_flg = 0;
 
 
+
 //OTHER
 char char_in;
 char blue_char;
