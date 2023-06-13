@@ -58,7 +58,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
-TIM_HandleTypeDef htim11;
+TIM_HandleTypeDef htim10;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
@@ -76,13 +76,13 @@ float test_time;
 
 blue_drv_t blue1 = {'1', '0', &blue_char};
 
-//line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
+line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
 line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 
 motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
-motor_drv_t motor2 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
-encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, &htim11, 16);
-encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, &htim11, 16*50);
+motor_drv_t motor2 = {1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
+encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, &htim10, 16*50);
+encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, &htim10, 16*50);
 
 /* USER CODE END PV */
 
@@ -97,8 +97,8 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART6_UART_Init(void);
-static void MX_TIM11_Init(void);
 static void MX_TIM5_Init(void);
+static void MX_TIM10_Init(void);
 /* USER CODE BEGIN PFP */
 void usrprint(const char* message);
 void usrprint(uint32_t value);
@@ -162,7 +162,7 @@ void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, UART_HandleTypeDef* huart) {
 	  setPWM(motor1);
 	  setPWM(motor2);
-	  comPutty(huart);
+	  //comPutty(huart);
 }
 
 void CORRAL_TASK(Servo& CORRAL_SERVO) {
@@ -226,8 +226,8 @@ int main(void)
   MX_TIM4_Init();
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
-  MX_TIM11_Init();
   MX_TIM5_Init();
+  MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -247,7 +247,7 @@ int main(void)
   // -----------------  NAVIGATION TASK  ---------------------------------
   // -----------------  DEADMAN TASK     ---------------------------------
   HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
-  HAL_TIM_Base_Start_IT(&htim11);
+  //HAL_TIM_Base_Start_IT(&htim10);
   // -----------------  CORRAL TASK     ---------------------------------
   Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_4, &htim5);
   SERVO_CORRAL.max_rot = 270;
@@ -265,6 +265,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	//SORT_TASK(RGB_SORT, SERVO_SORT);
+	MOTOR_TASK(&motor1, &motor2, &huart1);
+	  	  //HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -544,7 +547,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 4800-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
@@ -675,33 +678,33 @@ static void MX_TIM5_Init(void)
 }
 
 /**
-  * @brief TIM11 Initialization Function
+  * @brief TIM10 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM11_Init(void)
+static void MX_TIM10_Init(void)
 {
 
-  /* USER CODE BEGIN TIM11_Init 0 */
+  /* USER CODE BEGIN TIM10_Init 0 */
 
-  /* USER CODE END TIM11_Init 0 */
+  /* USER CODE END TIM10_Init 0 */
 
-  /* USER CODE BEGIN TIM11_Init 1 */
+  /* USER CODE BEGIN TIM10_Init 1 */
 
-  /* USER CODE END TIM11_Init 1 */
-  htim11.Instance = TIM11;
-  htim11.Init.Prescaler = 2000-1;
-  htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim11.Init.Period = 48000-1;
-  htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim11.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim11) != HAL_OK)
+  /* USER CODE END TIM10_Init 1 */
+  htim10.Instance = TIM10;
+  htim10.Init.Prescaler = 2000-1;
+  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim10.Init.Period = 48000-1;
+  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM11_Init 2 */
+  /* USER CODE BEGIN TIM10_Init 2 */
 
-  /* USER CODE END TIM11_Init 2 */
+  /* USER CODE END TIM10_Init 2 */
 
 }
 
@@ -787,37 +790,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-
   /*Configure GPIO pins : M1_OUTA_Pin M1_OUTB_Pin */
   GPIO_InitStruct.Pin = M1_OUTA_Pin|M1_OUTB_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : M3_OUTA_Pin M3_OUTB_Pin */
-  GPIO_InitStruct.Pin = M3_OUTA_Pin|M3_OUTB_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LEFT_LINE_OUT_Pin M2_OUTB_Pin M2_OUTA_Pin */
-  GPIO_InitStruct.Pin = LEFT_LINE_OUT_Pin|M2_OUTB_Pin|M2_OUTA_Pin;
+  /*Configure GPIO pins : LEFT_LINE_OUT_Pin RIGHT_LINE_OUT_Pin M2_OUTB_Pin M2_OUTA_Pin */
+  GPIO_InitStruct.Pin = LEFT_LINE_OUT_Pin|RIGHT_LINE_OUT_Pin|M2_OUTB_Pin|M2_OUTA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : RGB2_INT_Pin RGB1_INT_Pin */
-  GPIO_InitStruct.Pin = RGB2_INT_Pin|RGB1_INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -827,12 +808,6 @@ static void MX_GPIO_Init(void)
 
   HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
@@ -867,10 +842,8 @@ void usrprint(uint32_t value)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
 	if(huart == &huart1){
-		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
+		usrprint(&char_in);
 		HAL_UART_Receive_IT(huart,(uint8_t*) &char_in, 1);
-		//print_Blue(&blue1, &huart1);
-		usrprint(encoder2.pos);
 	}
 	if(huart == &huart6){
 		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
@@ -880,7 +853,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 // Callback: timer has rolled over
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   // Check which version of the timer triggered this callback
-  if (htim == &htim11 ){
+  if (htim == &htim10 ){
 	  updateStatus(&blue1);
 	  // May need to move if stantement as function into master mind task
 	  if(blue1.status == '0' && blue1.cur_state == '1'){
@@ -949,7 +922,7 @@ void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
 	}
 }*/
 
-void comPutty(UART_HandleTypeDef* huart){
+/*void comPutty(UART_HandleTypeDef* huart){
 	if(char_in != '\0'){
 		if(char_in == '\r'){
 			char clear[2] = ""
@@ -991,7 +964,7 @@ void comPutty(UART_HandleTypeDef* huart){
 		}
 		char_in = '\0';
 	}
-}
+}*/
 
 /* USER CODE END 4 */
 
