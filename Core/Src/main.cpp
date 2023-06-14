@@ -285,10 +285,10 @@ int main(void)
   sort_flg = 2;
   while (1)
   {
-	  //CORRAL_TASK(SERVO_CORRAL);
-	  //SORT_TASK(RGB_SORT, SERVO_SORT);
-	  NAV_TASK();
-	  MOTOR_TASK(&motor1,&motor2,&motor3);
+	  CORRAL_TASK(SERVO_CORRAL);
+	  SORT_TASK(RGB_SORT, SERVO_SORT);
+	  //NAV_TASK();
+	  //MOTOR_TASK(&motor1,&motor2,&motor3);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
