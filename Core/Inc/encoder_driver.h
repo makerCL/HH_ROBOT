@@ -21,19 +21,15 @@ typedef struct encoder_drv {
 	uint16_t			GPIO_Pin2;
 	GPIO_TypeDef*		GPIOx2;
 
-	TIM_HandleTypeDef*	htim;
-	uint16_t			LAST_TIME;
-
 	int32_t             TPR;
-	int8_t				pos;
-	int8_t				vel;
+	double				pos;
 } encoder_drv_t;
 
-encoder_drv_t init_encoder(uint16_t	GPIO_Pin1, GPIO_TypeDef* GPIOx1, uint16_t GPIO_Pin2, GPIO_TypeDef* GPIOx2, TIM_HandleTypeDef* htim, int32_t TPR);
+encoder_drv_t init_encoder(uint16_t	GPIO_Pin1, GPIO_TypeDef* GPIOx1, uint16_t GPIO_Pin2, GPIO_TypeDef* GPIOx2, int32_t TPR);
 
 void update_encoder(encoder_drv_t* encoder_drv);
 
-void print_encoder(encoder_drv_t* encoder_drv);
+//void print_encoder(encoder_drv_t* encoder_drv);
 
 void Update_Encoder_State(encoder_drv_t* encoder_drv);
 

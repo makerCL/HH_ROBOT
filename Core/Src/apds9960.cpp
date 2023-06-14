@@ -1,10 +1,10 @@
 #include "APDS9960.h"
 
-APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle) {
+APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle, uint16_t Atime) {
 	hi2c = i2cHandle;
 	huart = uartHandle;
 	RGB_Margin = 20;
-	ATIME = 246;
+	ATIME = Atime;
 	strcpy(ball_color, "RED"); // default team color to RED
 
 	initialize();

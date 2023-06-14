@@ -57,32 +57,43 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
-TIM_HandleTypeDef htim5;
+TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim10;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
-//FSM FLAGS
-uint8_t sort_flg = 0;
+uint8_t sort_flg = 1;
+uint8_t corral_flg = 1;
 
-
-//OTHER
 char char_in;
 char blue_char;
 char char_buff[5] = "0000";
-float test_time;
 
-blue_drv_t blue1 = {'1', '0', &blue_char};
+
+blue_drv_t blue1 = {'0', '0', &blue_char};
 
 line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
 line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 
-motor_drv_t motor1 = {2000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
-motor_drv_t motor2 = {1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
-encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, &htim10, 16*50);
-encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, &htim10, 16*50);
+motor_drv_t motor1 = { 1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
+motor_drv_t motor2 = { 1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
+motor_drv_t motor3 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim3};
+
+encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, 64*50);
+encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, 64*50);
+
+// Start Color Sensor
+APDS9960 RGB_SORT(&hi2c1, &huart1, 250);
+
+// Servo Object
+Servo SERVO_SORT(&htim4, TIM_CHANNEL_4);
+Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_3);
+
+
+
+
 
 /* USER CODE END PV */
 
@@ -97,13 +108,45 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART6_UART_Init(void);
-static void MX_TIM5_Init(void);
 static void MX_TIM10_Init(void);
+static void MX_TIM9_Init(void);
 /* USER CODE BEGIN PFP */
 void usrprint(const char* message);
 void usrprint(uint32_t value);
-void comPutty(UART_HandleTypeDef* huart);
 
+/*void MASTERMIND_TASK (Servo& CORRAL_SERVO) {
+	if (CORRAL_SERVO.processing_flag == 0) {
+			CORRAL_SERVO.processing_flag = 1;
+	} else if (CORRAL_SERVO.processing_flag == 1) {
+		CORRAL_SERVO.processing_flag = 0;
+	}
+
+}*/
+
+void CORRAL_TASK(Servo& SERVO_obj) {
+	// 90deg => 0deg
+	if (corral_flg == 0 && SERVO_obj.flag == 0) {
+			SERVO_obj.setAngle(0,10000);
+			corral_flg = 2;
+	// 0deg => 45deg
+	} else if (corral_flg == 1 && SERVO_obj.flag == 0) {
+		SERVO_obj.setAngle(45,5000);
+		corral_flg = 2;
+	// 45deg => 0deg
+	} else if (corral_flg == 2 && SERVO_obj.flag == 0) {
+		SERVO_obj.setAngle(0,5000);
+		corral_flg = 1;
+	}
+}
+
+
+
+
+void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, motor_drv_t* motor3) {
+	  setPWM(motor1);
+	  setPWM(motor2);
+	  setPWM(motor3);
+}
 
 void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 	if (sort_flg != 0) {
@@ -113,7 +156,6 @@ void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 	if (sort_flg == 1) {
 		//State 1: Sensing
 		if (RGB_obj.ballDetect()) {
-			SERVO_obj.startTimer();
 			sort_flg = 2;
 			usrprint("Ball Detected");
 		}
@@ -124,10 +166,10 @@ void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 
 		// Determine if ball should be kept
 		if (RGB_obj.colorSort()) { //if ball is our color
-			SERVO_obj.setAngle(0); // coral
+			SERVO_obj.setAngle(0,5000); // coral
 			usrprint("Target Ball Acquired! Storing...");
 		} else {
-			SERVO_obj.setAngle(180); // reject
+			SERVO_obj.setAngle(180,5000); // reject
 			usrprint("Incorrect ball... rejecting");
 		}
 
@@ -135,51 +177,20 @@ void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 
 	} else if (sort_flg == 3) {
 		//State 3: Sort Movement
-		//usrprint(SERVO_obj.elapsedTime());
-		if (SERVO_obj.elapsedTime() > 2000 ){
+		if (SERVO_obj.flag == 0){
 			usrprint("Position Reset");
-			SERVO_obj.startTimer();
 			sort_flg = 4;
-
 		}
 
 	} else if (sort_flg == 4) {
 		//State 4: resetting
-		SERVO_obj.setAngle(90); // 90 degrees
-
-		if (SERVO_obj.elapsedTime() > 2000 ){
-			SERVO_obj.startTimer();
+		SERVO_obj.setAngle(90,5000); // 90 degrees
+		if (SERVO_obj.flag == 0){
 			sort_flg = 1;
 			usrprint("Ready for new ball!");
 		}
 	}
 
-
-}
-
-
-
-void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, UART_HandleTypeDef* huart) {
-	  setPWM(motor1);
-	  setPWM(motor2);
-	  //comPutty(huart);
-}
-
-void CORRAL_TASK(Servo& CORRAL_SERVO) {
-	if (CORRAL_SERVO.processing_flag == 0) {
-		CORRAL_SERVO.setAngle(0);
-	} else if (CORRAL_SERVO.processing_flag == 1) {
-		CORRAL_SERVO.setAngle(90);
-	}
-
-}
-
-void MASTERMIND_TASK (Servo& CORRAL_SERVO) {
-	if (CORRAL_SERVO.processing_flag == 0) {
-			CORRAL_SERVO.processing_flag = 1;
-	} else if (CORRAL_SERVO.processing_flag == 1) {
-		CORRAL_SERVO.processing_flag = 0;
-	}
 
 }
 
@@ -226,48 +237,41 @@ int main(void)
   MX_TIM4_Init();
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
-  MX_TIM5_Init();
   MX_TIM10_Init();
+  MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
+  SERVO_SORT.initialize();
 
 
-  /*################# INITIALIZATION ####################################-*/
-  usrprint("Initializing...");
-  // -----------------  SORT TASK  ---------------------------------
-  // Color Sensor Initialization
-  APDS9960 RGB_SORT(&hi2c1, &huart1);
-  sort_flg = RGB_SORT.initialize();
-  RGB_SORT.ATIME = 250; //change sensor read time to adjust for lighting conditions
-  // Create a Servo object
-  Servo SERVO_SORT(&htim4, TIM_CHANNEL_3, &htim5);
-
-
-
-  // -----------------  DRIVE TASK  --------------------------------------
-  // -----------------  NAVIGATION TASK  ---------------------------------
-  // -----------------  DEADMAN TASK     ---------------------------------
-  HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
-  //HAL_TIM_Base_Start_IT(&htim10);
-  // -----------------  CORRAL TASK     ---------------------------------
-  Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_4, &htim5);
   SERVO_CORRAL.max_rot = 270;
-  SERVO_CORRAL.setAngle(90); //start in upright position TODO: move to mastermind at some point
-  // -----------------  MASTERMIND TASK  ---------------------------------
-  HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
+  SERVO_CORRAL.setAngle(90,2000); //start in upright position TODO: move to mastermind at some point
+  SERVO_CORRAL.initialize();
 
+
+
+
+
+
+
+  // Start UART
+  HAL_UART_Receive_IT(&huart1,(uint8_t*) &char_in, 1);
+  HAL_UART_Receive_IT(&huart6,(uint8_t*) &blue_char, 1);
+  // Start timer
+  HAL_TIM_Base_Start_IT(&htim10);
+  HAL_TIM_Base_Start_IT(&htim9);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  sort_flg = 2;
   while (1)
   {
-
+	  CORRAL_TASK(SERVO_CORRAL);
+	  SORT_TASK(RGB_SORT, SERVO_SORT);
+	  MOTOR_TASK(&motor1,&motor2,&motor3);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	//SORT_TASK(RGB_SORT, SERVO_SORT);
-	MOTOR_TASK(&motor1, &motor2, &huart1);
-	  	  //HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -598,9 +602,9 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 1920-1;
+  htim4.Init.Prescaler = 96-1;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 1000-1;
+  htim4.Init.Period = 20000-1;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
@@ -633,47 +637,40 @@ static void MX_TIM4_Init(void)
 }
 
 /**
-  * @brief TIM5 Initialization Function
+  * @brief TIM9 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM5_Init(void)
+static void MX_TIM9_Init(void)
 {
 
-  /* USER CODE BEGIN TIM5_Init 0 */
+  /* USER CODE BEGIN TIM9_Init 0 */
 
-  /* USER CODE END TIM5_Init 0 */
+  /* USER CODE END TIM9_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM5_Init 1 */
+  /* USER CODE BEGIN TIM9_Init 1 */
 
-  /* USER CODE END TIM5_Init 1 */
-  htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 95;
-  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
-  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  /* USER CODE END TIM9_Init 1 */
+  htim9.Instance = TIM9;
+  htim9.Init.Prescaler = 2-1;
+  htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim9.Init.Period = 48000-1;
+  htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
   {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&htim9, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM5_Init 2 */
+  /* USER CODE BEGIN TIM9_Init 2 */
 
-  /* USER CODE END TIM5_Init 2 */
+  /* USER CODE END TIM9_Init 2 */
 
 }
 
@@ -823,27 +820,33 @@ void usrprint(const char* message)
     char* completeMessage = new char[strlen(message) + 3];
     strcpy(completeMessage, message);
     strcat(completeMessage, "\r\n");
-    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
-
-    HAL_UART_Transmit(&huart1, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart6, reinterpret_cast<uint8_t*>(const_cast<char*>(completeMessage)), strlen(completeMessage), HAL_MAX_DELAY);
 
     delete[] completeMessage; // Release the dynamically allocated memory
 }
 
 void usrprint(uint32_t value)
 {
-    char stringValue[20];
+    char stringValue[30];
     sprintf(stringValue, "%lu", value); // Convert uint32_t to string
     // Print the value
     usrprint(stringValue);
 }
 
+void usrprint(const char* message,uint32_t value)
+{
+    char stringValue[30];
+    sprintf(stringValue, message, value); // Convert uint32_t to string
+    // Print the value
+    usrprint(stringValue);
+}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
 	if(huart == &huart1){
-		usrprint(&char_in);
+		HAL_UART_Transmit(&huart1,(uint8_t*) &char_in, 1,1000);
 		HAL_UART_Receive_IT(huart,(uint8_t*) &char_in, 1);
+
 	}
 	if(huart == &huart6){
 		HAL_UART_Receive_IT(huart,(uint8_t*) &blue_char, 1);
@@ -853,118 +856,47 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 // Callback: timer has rolled over
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   // Check which version of the timer triggered this callback
-  if (htim == &htim10 ){
-	  updateStatus(&blue1);
-	  // May need to move if stantement as function into master mind task
-	  if(blue1.status == '0' && blue1.cur_state == '1'){
-		  disable(&motor1);
-		  disable(&motor2);
-		  blue1.cur_state = '0';
-	  } else if(blue1.status == '1' && blue1.cur_state == '0'){
-		  enable(&motor1);
-		  enable(&motor2);
-		  blue1.cur_state = '1';
-	  }
+  if (htim == &htim9 ){
+	  SERVO_CORRAL.update_servo_flag();
+	  SERVO_SORT.update_servo_flag();
+	  Update_Encoder_State(&encoder1);
+	  Update_Encoder_State(&encoder2);
   }
-  Update_Encoder_State(&encoder1);
-  Update_Encoder_State(&encoder2);
+  else if (htim == &htim10 ){
+  	  updateStatus(&blue1);
+  	  // May need to move if stantement as function into master mind task
+  	  if(blue1.status == '0' && blue1.cur_state == '1'){
+  		  disable(&motor1);
+  		  disable(&motor2);
+  		  disable(&motor3);
+  		  blue1.cur_state = '0';
+  	  } else if(blue1.status == '1' && blue1.cur_state == '0'){
+  		  enable(&motor1);
+  		  enable(&motor2);
+  		  enable(&motor3);
+  		  blue1.cur_state = '1';
+  	  }
+	  //usrprint("encoder1.pos: %lu",encoder1.pos);
+	  //usrprint("encoder2.pos: %lu",encoder2.pos);
+    }
 }
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
-	/*if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
-		update_Line(&lineR);
-		print_LineF(&lineR, &huart1);
-	}*/
+	if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
+		//update_Line(&lineR);
+		//print_LineF(&lineR, &huart1);
+	}
 	if (GPIO_Pin == LEFT_LINE_OUT_Pin){
-		update_Line(&lineL);
-		print_LineF(&lineL, &huart1);
+		//update_Line(&lineL);
+		//print_LineF(&lineL, &huart1);
 	}
-	else if (GPIO_Pin == M1_OUTA_Pin || GPIO_Pin == M1_OUTB_Pin){
+	if (GPIO_Pin == M1_OUTA_Pin || GPIO_Pin == M1_OUTB_Pin){
 		update_encoder(&encoder1);
-		char str[25];
-		sprintf(str, "Encoder1: %lu", encoder1.TOTAL_COUNT);
-		usrprint(str);
 	}
-	else if (GPIO_Pin == M2_OUTA_Pin || GPIO_Pin == M2_OUTB_Pin){
+	if (GPIO_Pin == M2_OUTA_Pin || GPIO_Pin == M2_OUTB_Pin){
 		update_encoder(&encoder2);
-		char str[25];
-		sprintf(str, "Encoder2: %lu", encoder2.TOTAL_COUNT);
-		usrprint(str);
 	}
 }
-
-/*void BluePutty(UART_HandleTypeDef* huart){
-	if(blue_char != '0'){
-		if(char_buff[0] == 'M'){
-			if(char_buff[1] == '1' || char_buff[1] == '2'){
-				if(((char_buff[2] >= '0' && char_buff[2] <= '9') ||
-					(char_buff[2] >= 'A' && char_buff[2] <= 'F')) &&
-				   ((char_buff[3] >= '0' && char_buff[3] <= '9') ||
-					(char_buff[3] >= 'A' && char_buff[3] <= 'F'))){
-
-					char hex_char[3] = {char_buff[2],char_buff[3]};
-					int hex_int;
-					sscanf(hex_char, "%x", &hex_int);
-					int8_t val = (int8_t)(hex_int);
-
-					if(char_buff[1] == '1'){
-						scaleNewPulse(&motor1,val);
-						char recieved[25] = "\nMOTOR1: UPDATED\n\n\r";
-						HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
-					} else {
-						char recieved[25] = "\nMOTOR2: UPDATED\n\n\r";
-						HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
-						scaleNewPulse(&motor2,val);
-					}
-				}
-			}
-		}
-	}
-}*/
-
-/*void comPutty(UART_HandleTypeDef* huart){
-	if(char_in != '\0'){
-		if(char_in == '\r'){
-			char clear[2] = ""
-					"\n";
-			HAL_UART_Transmit(huart,(uint8_t*) &clear, strlen(clear),1000);
-			if(char_buff[0] == 'M'){
-				if(char_buff[1] == '1' || char_buff[1] == '2'){
-					if(((char_buff[2] >= '0' && char_buff[2] <= '9') ||
-						(char_buff[2] >= 'A' && char_buff[2] <= 'F')) &&
-					   ((char_buff[3] >= '0' && char_buff[3] <= '9') ||
-						(char_buff[3] >= 'A' && char_buff[3] <= 'F'))){
-
-						char hex_char[3] = {char_buff[2],char_buff[3]};
-						int hex_int;
-						sscanf(hex_char, "%x", &hex_int);
-						int8_t val = (int8_t)(hex_int);
-
-						if(char_buff[1] == '1'){
-							scaleNewPulse(&motor1,val);
-							char recieved[25] = "\nMOTOR1: UPDATED\n\n\r";
-							HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
-						} else {
-							char recieved[25] = "\nMOTOR2: UPDATED\n\n\r";
-							HAL_UART_Transmit(huart,(uint8_t*) &recieved, strlen(recieved),1000);
-							scaleNewPulse(&motor2,val);
-						}
-					}
-				}
-			}
-			char_buff[3] = '0';
-			char_buff[2] = '0';
-			char_buff[1] = '0';
-			char_buff[0] = '0';
-		} else {
-			char_buff[0] = char_buff[1];
-			char_buff[1] = char_buff[2];
-			char_buff[2] = char_buff[3];
-			char_buff[3] = char_in;
-		}
-		char_in = '\0';
-	}
-}*/
 
 /* USER CODE END 4 */
 

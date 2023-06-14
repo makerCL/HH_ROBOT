@@ -10,7 +10,7 @@
 
 class APDS9960 {
 public:
-    APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle);
+    APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle, uint16_t ATIME);
 
     char ball_color[13];
 
