@@ -24,6 +24,8 @@ void disable(motor_drv_t* motor_drv);
 
 void scaleNewPulse(motor_drv_t* motor_drv, int8_t val_8);
 
+void NewPulse(motor_drv_t* motor_drv, int32_t val_32);
+
 void setPWM(motor_drv_t* motor_drv);
 
 

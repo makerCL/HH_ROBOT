@@ -21,6 +21,17 @@ void scaleNewPulse(motor_drv_t* motor_drv, int8_t val_8){
 	motor_drv->pulse = ((int32_t)val_8)*(2*(int32_t)motor_drv->htim->Init.Period + 1)/256;
 }
 
+void NewPulse(motor_drv_t* motor_drv, int32_t val_32){
+	if(val_32 >= (int32_t)motor_drv->htim->Init.Period){
+		motor_drv->pulse =  motor_drv->htim->Init.Period/2;
+	} else if (-val_32 >= (int32_t)motor_drv->htim->Init.Period){
+		motor_drv->pulse =  -motor_drv->htim->Init.Period/2;
+	} else {
+		motor_drv->pulse = val_32/2;
+	}
+
+}
+
 void setPWM(motor_drv_t* motor_drv){
 	uint32_t ch1_pulse = 0;
 	uint32_t ch2_pulse = 0;

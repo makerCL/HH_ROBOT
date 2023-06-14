@@ -69,33 +69,42 @@ UART_HandleTypeDef huart6;
 uint8_t sort_flg = 1;
 uint8_t corral_flg = 1;
 uint8_t nav_flg = 1;
+uint8_t nav_2_flg = 1;
 
 char char_in;
 char blue_char;
-char char_buff[5] = "0000";
+double PathL;
 
 
-blue_drv_t blue1 = {'0', '0', &blue_char};
+blue_drv_t blue1 = {'0', '1', &blue_char};
 
 line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
 line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 
-motor_drv_t motor1 = { 0, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
-motor_drv_t motor2 = { 0, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
+motor_drv_t motor1 = {0, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
+motor_drv_t motor2 = {0, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
 motor_drv_t motor3 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim3};
 
 encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, 64*50);
 encoder_drv_t encoder2 = init_encoder(M2_OUTA_Pin, GPIOB, M2_OUTB_Pin, GPIOB, 64*50);
 
 // Start Color Sensor
-APDS9960 RGB_SORT(&hi2c1, &huart1, 250);
+APDS9960 RGB_SORT(&hi2c1, &huart6, 250);
 
 // Servo Object
 Servo SERVO_SORT(&htim4, TIM_CHANNEL_4);
 Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_3);
 
+// PID
+PID_drv_t PID1 = {0, 0, 0, 20, 0, 0, 17};
+PID_drv_t PID2 = {0, 0, 0, 20, 0, 0, 17};
+
+// Build World
+double y_start = 36;
+world_drv_t world = {0,-y_start,90,5, (int16_t)y_start, 0, -y_start,37000/720,6400/11};
+
 //Navigation
-nav_drv_t nav = nav_Init(&motor1, &motor2, &encoder1, &encoder2);
+nav_drv_t nav = {&motor1,&motor2,&encoder1,&encoder2,&PID1,&PID2,&world,0};
 
 
 
@@ -119,43 +128,79 @@ static void MX_TIM9_Init(void);
 void usrprint(const char* message);
 void usrprint(uint32_t value);
 
-/*void MASTERMIND_TASK (Servo& CORRAL_SERVO) {
-	if (CORRAL_SERVO.processing_flag == 0) {
-			CORRAL_SERVO.processing_flag = 1;
-	} else if (CORRAL_SERVO.processing_flag == 1) {
-		CORRAL_SERVO.processing_flag = 0;
+void MASTERMIND_TASK () {
+	if (nav_flg == 5 && nav.flag == 0) {
+		corral_flg = 2;
 	}
-
-}*/
+	if (corral_flg == 2 && SERVO_CORRAL.flag == 0){
+		nav_flg = 6;
+	}
+	if (nav_flg == 5 && nav.flag == 0) {
+		corral_flg = 1;
+	}
+}
 
 void NAV_TASK(){
-	if(nav_flg == 1){
-		if(nav.flag == 0){
-			nav_Lin(&nav,6400);
-			nav_flg = 2;
-		}
-	} else if(nav_flg == 2){
-		if(nav.flag == 0){
-			nav_Rot(&nav,3200*5);
-			nav_flg = 1;
+	if(blue1.status == '1'){
+		nav_Update_PID(&nav);
+		if(nav_flg == 1 && nav.flag == 0){
+			nav_Lin(&nav,6*3);
+			nav_flg++;
+		} else if(nav_flg == 2 && nav.flag == 0){
+			nav_Rot(&nav,-60);
+			nav_flg++;
+			PathL = -world.y_tot_pos;
+		} else if(nav_flg == 3){
+			if(nav_2_flg == 12 && nav.flag == 0){
+				nav_Rot(&nav,120);
+				nav_flg++;
+				nav_2_flg = 1;
+			} else if(nav_2_flg%2 == 1){
+				if(nav.flag == 0){
+					nav_Lin(&nav,PathL);
+					nav_2_flg++;
+				}
+			} else if(nav_2_flg%2 == 0){
+				if(nav.flag == 0){
+					nav_Rot(&nav,60);
+					nav_2_flg++;
+				}
+			}
+		} else if(nav_flg == 4){
+			if(nav.flag == 0){
+				nav_Lin(&nav,-.5);
+				nav_2_flg++;
+			}
+			if(lineR.state == '1' || lineL.state == '1'){
+				nav_flg++;
+			}
+		} else if(nav_flg == 5){
+			if(nav.flag == 0){
+				//waiting for Corral 2 lift
+			}
+		}  else if(nav_flg == 6){
+			if(nav.flag == 0){
+				nav_Lin(&nav,.5*(nav_2_flg-2));
+				nav_flg = 2;
+				nav_2_flg = 1;
+			}
 		}
 	}
 }
 
 void CORRAL_TASK(Servo& SERVO_obj) {
-	// 90deg => 0deg
-	if (corral_flg == 0 && SERVO_obj.flag == 0) {
-			SERVO_obj.setAngle(0,10000);
-			corral_flg = 2;
-	// 0deg => 45deg
-	} else if (corral_flg == 1 && SERVO_obj.flag == 0) {
-		SERVO_obj.setAngle(45,5000);
-		corral_flg = 2;
-	// 45deg => 0deg
-	} else if (corral_flg == 2 && SERVO_obj.flag == 0) {
-		SERVO_obj.setAngle(0,5000);
-		corral_flg = 1;
+	if(blue1.status == '1'){
+		// 45deg => 0deg
+		if (corral_flg == 1 && SERVO_obj.flag == 0) {
+			SERVO_obj.setAngle(0,2000);
+			corral_flg = 0;
+		// 0deg => 45deg
+		} else if (corral_flg == 2 && SERVO_obj.flag == 0) {
+			SERVO_obj.setAngle(45,2000);
+			corral_flg = 0;
+		}
 	}
+
 }
 
 
@@ -168,48 +213,49 @@ void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, motor_drv_t* motor3) {
 }
 
 void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
-	if (sort_flg != 0) {
-		RGB_obj.readRGBC();
+	if(blue1.status == '1'){
+		if (sort_flg != 0) {
+			RGB_obj.readRGBC();
+		}
+
+		if (sort_flg == 1) {
+			//State 1: Sensing
+			if (RGB_obj.ballDetect()) {
+				sort_flg = 2;
+				//usrprint("Ball Detected");
+			}
+			//RGB_obj.printRGBCBuffer();
+
+		} else if (sort_flg == 2){
+			//State 2: Processing
+
+			// Determine if ball should be kept
+			if (RGB_obj.colorSort()) { //if ball is our color
+				SERVO_obj.setAngle(0,5000); // coral
+				//usrprint("Target Ball Acquired! Storing...");
+			} else {
+				SERVO_obj.setAngle(180,5000); // reject
+				//usrprint("Incorrect ball... rejecting");
+			}
+
+			sort_flg = 3;
+
+		} else if (sort_flg == 3) {
+			//State 3: Sort Movement
+			if (SERVO_obj.flag == 0){
+				//usrprint("Position Reset");
+				SERVO_obj.setAngle(90,5000); // 90 degrees
+				sort_flg = 4;
+			}
+
+		} else if (sort_flg == 4) {
+			//State 4: resetting
+			if (SERVO_obj.flag == 0){
+				sort_flg = 1;
+				//usrprint("Ready for new ball!");
+			}
+		}
 	}
-
-	if (sort_flg == 1) {
-		//State 1: Sensing
-		if (RGB_obj.ballDetect()) {
-			sort_flg = 2;
-			usrprint("Ball Detected");
-		}
-		RGB_obj.printRGBCBuffer();
-
-	} else if (sort_flg == 2){
-		//State 2: Processing
-
-		// Determine if ball should be kept
-		if (RGB_obj.colorSort()) { //if ball is our color
-			SERVO_obj.setAngle(0,5000); // coral
-			usrprint("Target Ball Acquired! Storing...");
-		} else {
-			SERVO_obj.setAngle(180,5000); // reject
-			usrprint("Incorrect ball... rejecting");
-		}
-
-		sort_flg = 3;
-
-	} else if (sort_flg == 3) {
-		//State 3: Sort Movement
-		if (SERVO_obj.flag == 0){
-			usrprint("Position Reset");
-			sort_flg = 4;
-		}
-
-	} else if (sort_flg == 4) {
-		//State 4: resetting
-		SERVO_obj.setAngle(90,5000); // 90 degrees
-		if (SERVO_obj.flag == 0){
-			sort_flg = 1;
-			usrprint("Ready for new ball!");
-		}
-	}
-
 
 }
 
@@ -259,12 +305,14 @@ int main(void)
   MX_TIM10_Init();
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
-  SERVO_SORT.initialize();
 
+  SERVO_SORT.initialize();
+  SERVO_SORT.setAngle(90,2000);
 
   SERVO_CORRAL.max_rot = 270;
-  SERVO_CORRAL.setAngle(90,2000); //start in upright position TODO: move to mastermind at some point
   SERVO_CORRAL.initialize();
+  SERVO_CORRAL.setAngle(45,2000); //start in upright position TODO: move to mastermind at some point
+
 
 
 
@@ -282,13 +330,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  sort_flg = 2;
   while (1)
   {
+	  MASTERMIND_TASK();
 	  CORRAL_TASK(SERVO_CORRAL);
 	  SORT_TASK(RGB_SORT, SERVO_SORT);
-	  //NAV_TASK();
-	  //MOTOR_TASK(&motor1,&motor2,&motor3);
+	  NAV_TASK();
+	  MOTOR_TASK(&motor1,&motor2,&motor3);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -897,19 +945,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   		  enable(&motor3);
   		  blue1.cur_state = '1';
   	  }
-	  //usrprint("encoder1.pos: %lu",encoder1.pos);
-	  //usrprint("encoder2.pos: %lu",encoder2.pos);
+	  usrprint("PID1.error: %lu",PID2.last_error);
+	  usrprint("PID1.error: %lu",-PID2.last_error);
+	  usrprint("nav_flg: %lu",nav_flg);
+	  //usrprint("encoder1.pos: %lu",encoder1.TOTAL_COUNT);
+
     }
 }
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
 	if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
-		//update_Line(&lineR);
-		//print_LineF(&lineR, &huart1);
+		update_Line(&lineR);
+		usrprint("RightL.State: %lu",lineR.state);
 	}
 	if (GPIO_Pin == LEFT_LINE_OUT_Pin){
-		//update_Line(&lineL);
-		//print_LineF(&lineL, &huart1);
+		update_Line(&lineL);
+		usrprint("LeftL.State: %lu",lineL.state);
 	}
 	if (GPIO_Pin == M1_OUTA_Pin || GPIO_Pin == M1_OUTB_Pin){
 		update_encoder(&encoder1);

@@ -8,80 +8,67 @@
 
 
 #include "navigation.h"
-
-MotorController::MotorController(){
-}
-
-uint8_t MotorController::runController(float curr_posn) {
-	float error = setpoint - curr_posn;
-	error_sum = error_sum + error;
-
-	uint8_t PWM = k_p * error + k_i * error_sum + k_d * (error - last_error);
-	last_error = error;
-
-	return PWM;
-}
+#include <cmath>
 
 
-nav_drv_t nav_Init(motor_drv_t* motor1, motor_drv_t* motor2, encoder_drv_t* encoder1, encoder_drv_t* encoder2){
-	int32_t y_start = 1000;
-
-	MotorController PID1 = MotorController();
-	PID1.k_p = 1;
-	PID1.k_i = 0;
-	PID1.k_d = 1;
-
-	MotorController PID2 = MotorController();
-	PID2.k_p = 1;
-	PID2.k_i = 0;
-	PID2.k_d = 1;
-
-	world_drv_t world = {0,y_start,90,5, y_start, 0, y_start,10000,10000};
-
-	return {motor1,motor2,encoder1,encoder2,&PID1,&PID2,&world,0};
-}
-
-void nav_Rot(nav_drv_t* nav_drv, float dtick){
+void nav_Rot(nav_drv_t* nav_drv, float deg){
 	if(nav_drv->flag == 0){
 		zero(nav_drv->encoder1);
 		zero(nav_drv->encoder2);
 
-		nav_drv->PID1->setpoint = -dtick;
-		nav_drv->PID2->setpoint =  dtick;
+		nav_drv->PID1->setpoint = -deg*nav_drv->world->ticksPerDeg;
+		nav_drv->PID2->setpoint =  deg*nav_drv->world->ticksPerDeg;
+		nav_drv->PID1->last_error = 100;
+		nav_drv->PID2->last_error = 100;
 
 		nav_drv->flag = 1;
+
+		nav_drv->world->theta += deg;
 	}
 }
 
-void nav_Lin(nav_drv_t* nav_drv, float dtick){
+void nav_Lin(nav_drv_t* nav_drv, float inches){
 	if(nav_drv->flag == 0){
 		zero(nav_drv->encoder1);
 		zero(nav_drv->encoder2);
 
-		nav_drv->PID1->setpoint =  dtick;
-		nav_drv->PID2->setpoint =  dtick;
+		nav_drv->PID1->setpoint =  inches*nav_drv->world->ticksPerinch;
+		nav_drv->PID2->setpoint =  inches*nav_drv->world->ticksPerinch;
+		nav_drv->PID1->last_error = 100;
+		nav_drv->PID2->last_error = 100;
 
 		nav_drv->flag = 1;
+
+		nav_drv->world->x_tot_pos += inches*cos(nav_drv->world->theta * M_PI / 180.0);
+		nav_drv->world->y_tot_pos += inches*sin(nav_drv->world->theta * M_PI / 180.0);
 	}
 }
 
 void nav_Update_PID(nav_drv_t* nav_drv){
-	scaleNewPulse(nav_drv->motor1,(*nav_drv->PID1).runController(nav_drv->encoder1->TOTAL_COUNT));
-	scaleNewPulse(nav_drv->motor2,(*nav_drv->PID2).runController(nav_drv->encoder2->TOTAL_COUNT));
+	NewPulse(nav_drv->motor1,PID_runController(nav_drv->PID1,nav_drv->encoder1->TOTAL_COUNT));
+	NewPulse(nav_drv->motor2,PID_runController(nav_drv->PID2,nav_drv->encoder2->TOTAL_COUNT));
 }
 
 void nav_Update_Flag(nav_drv_t* nav_drv){
-	float tolerance = 5;
-	if((nav_drv->PID1->last_error <= tolerance && -nav_drv->PID1->last_error <= tolerance)||
-	   (nav_drv->PID2->last_error <= tolerance && -nav_drv->PID2->last_error <= tolerance)){
+	if((nav_drv->flag != 0) &&
+	   (nav_drv->PID1->last_error <= nav_drv->PID1->tol && -nav_drv->PID1->last_error <= nav_drv->PID1->tol) &&
+	   (nav_drv->PID2->last_error <= nav_drv->PID2->tol && -nav_drv->PID2->last_error <= nav_drv->PID2->tol)){
 		nav_drv->flag = 0;
 	}
 }
 
+int32_t PID_runController(PID_drv_t* PID_drv, int32_t curr_posn){
+	int32_t error = PID_drv->setpoint - curr_posn;
+	PID_drv->error_sum = PID_drv->error_sum + error;
 
+	int32_t PWM = PID_drv->k_p * error + PID_drv->k_i * PID_drv->error_sum + PID_drv->k_d * (error - PID_drv->last_error);
+	PID_drv->last_error = error;
 
-int32_t nav_Line_If_Rot(nav_drv_t* nav_drv, int32_t theta){
+	return PWM;
+}
 
+int16_t nav_Line_If_Rot(nav_drv_t* nav_drv, int16_t theta){
+	return 7;
 }
 
 

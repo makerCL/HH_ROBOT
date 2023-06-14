@@ -6,34 +6,33 @@
 #include "motor_driver.h"
 #include "encoder_driver.h"
 
-class MotorController {
-	public:
-		MotorController();
-		float last_error = 0; // for derivative control
-		float error_sum = 0;
-		float setpoint = 0;
+typedef struct PID_drv{
+	int32_t last_error; // for derivative control
+	int32_t error_sum;
+	int32_t setpoint;
 
-		float k_p = 0;
-		float k_i = 0;
-		float k_d = 0;
+	float k_p;
+	float k_i;
+	float k_d;
 
-		uint8_t runController(float curr_posn);
-	private:
-};
+	int16_t tol;
+
+} PID_drv_t;
+
 
 typedef struct world_drv{
-	int32_t			x_tot_pos;
-	int32_t         y_tot_pos;
-	int32_t			theta;
+	double			x_tot_pos;
+	double          y_tot_pos;
+	double			theta;
 
-	int32_t			r_max;
-	int32_t			r_min;
+	int16_t			r_max;
+	int16_t			r_min;
 
-	int32_t			x_home;
-	int32_t         y_home;
+	double			x_home;
+	double         y_home;
 
-	int32_t			ticksPerDeg;
-	int32_t         ticksPerinch;
+	float			ticksPerDeg;
+	float           ticksPerinch;
 
 } world_drv_t;
 
@@ -42,27 +41,27 @@ typedef struct nav_drv{
 	motor_drv_t* 	motor2;
 	encoder_drv_t* 	encoder1;
 	encoder_drv_t* 	encoder2;
-	MotorController* PID1;
-	MotorController* PID2;
+	PID_drv_t* 		PID1;
+	PID_drv_t* 		PID2;
 
 	world_drv_t*	world;
 	uint8_t			flag;
 
 } nav_drv_t;
 
-nav_drv_t nav_Init(motor_drv_t* motor1, motor_drv_t* motor2, encoder_drv_t* encoder1, encoder_drv_t* encoder2);
+void nav_Rot(nav_drv_t* nav_drv, float deg);
 
-void nav_Rot(nav_drv_t* nav_drv, float dtick);
-
-void nav_Lin(nav_drv_t* nav_drv, float dtick);
+void nav_Lin(nav_drv_t* nav_drv, float inches);
 
 void nav_Update_PID(nav_drv_t* nav_drv);
 
 void nav_Update_Flag(nav_drv_t* nav_drv);
 
+int32_t PID_runController(PID_drv_t* PID_drv, int32_t curr_posn);
 
 
-int32_t nav_Line_If_Rot(nav_drv_t* nav_drv, int32_t theta);
+
+int16_t nav_Line_If_Rot(nav_drv_t* nav_drv, int16_t theta);
 
 void nav_Update_World(nav_drv_t* nav_drv);
 

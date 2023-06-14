@@ -11,7 +11,6 @@ Servo::Servo(TIM_HandleTypeDef* PWMHandle, uint32_t channel) : htim(PWMHandle), 
 void Servo::initialize(){
 	HAL_TIM_PWM_Start(htim, timer_channel);
 	// Set the initial position of the servo to 90 degrees
-	setAngle(90,5000);
 }
 
 void Servo::setAngle(uint32_t position_deg, uint16_t delay) {
