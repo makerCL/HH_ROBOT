@@ -15,6 +15,7 @@
   *
   ******************************************************************************
   */
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -30,6 +31,7 @@
 #include "bluetooth_driver.h"
 #include "line_driver.h"
 #include "encoder_driver.h"
+#include "navigation.h"
 
 /* USER CODE END Includes */
 
@@ -66,6 +68,7 @@ UART_HandleTypeDef huart6;
 /* USER CODE BEGIN PV */
 uint8_t sort_flg = 1;
 uint8_t corral_flg = 1;
+uint8_t nav_flg = 1;
 
 char char_in;
 char blue_char;
@@ -77,8 +80,8 @@ blue_drv_t blue1 = {'0', '0', &blue_char};
 line_drv_t lineR = {'0', GPIOB, RIGHT_LINE_OUT_Pin};
 line_drv_t lineL = {'0', GPIOB, LEFT_LINE_OUT_Pin};
 
-motor_drv_t motor1 = { 1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
-motor_drv_t motor2 = { 1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
+motor_drv_t motor1 = { 0, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim2};
+motor_drv_t motor2 = { 0, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim1};
 motor_drv_t motor3 = {-1000, TIM_CHANNEL_2, TIM_CHANNEL_1,&htim3};
 
 encoder_drv_t encoder1 = init_encoder(M1_OUTA_Pin, GPIOA, M1_OUTB_Pin, GPIOA, 64*50);
@@ -91,6 +94,8 @@ APDS9960 RGB_SORT(&hi2c1, &huart1, 250);
 Servo SERVO_SORT(&htim4, TIM_CHANNEL_4);
 Servo SERVO_CORRAL(&htim4, TIM_CHANNEL_3);
 
+//Navigation
+nav_drv_t nav = nav_Init(&motor1, &motor2, &encoder1, &encoder2);
 
 
 
@@ -122,6 +127,20 @@ void usrprint(uint32_t value);
 	}
 
 }*/
+
+void NAV_TASK(){
+	if(nav_flg == 1){
+		if(nav.flag == 0){
+			nav_Lin(&nav,6400);
+			nav_flg = 2;
+		}
+	} else if(nav_flg == 2){
+		if(nav.flag == 0){
+			nav_Rot(&nav,3200*5);
+			nav_flg = 1;
+		}
+	}
+}
 
 void CORRAL_TASK(Servo& SERVO_obj) {
 	// 90deg => 0deg
@@ -266,8 +285,9 @@ int main(void)
   sort_flg = 2;
   while (1)
   {
-	  CORRAL_TASK(SERVO_CORRAL);
-	  SORT_TASK(RGB_SORT, SERVO_SORT);
+	  //CORRAL_TASK(SERVO_CORRAL);
+	  //SORT_TASK(RGB_SORT, SERVO_SORT);
+	  NAV_TASK();
 	  MOTOR_TASK(&motor1,&motor2,&motor3);
     /* USER CODE END WHILE */
 
@@ -861,6 +881,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	  SERVO_SORT.update_servo_flag();
 	  Update_Encoder_State(&encoder1);
 	  Update_Encoder_State(&encoder2);
+	  nav_Update_Flag(&nav);
   }
   else if (htim == &htim10 ){
   	  updateStatus(&blue1);
