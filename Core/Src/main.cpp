@@ -5,7 +5,8 @@
   * @brief          : Main program body
   ******************************************************************************
   * @attention
-  *
+  * @author Miles Alderman
+  * @author John Bennett
   * Copyright (c) 2023 STMicroelectronics.
   * All rights reserved.
   *
@@ -66,6 +67,8 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
+
+/////// INITIALIZATION ////////////////////////////////////
 uint8_t sort_flg = 1;
 uint8_t corral_flg = 1;
 uint8_t nav_flg = 1;
@@ -128,6 +131,9 @@ static void MX_TIM9_Init(void);
 void usrprint(const char* message);
 void usrprint(uint32_t value);
 
+/**
+  * @brief The mastermind task. Mastermind manages other tasks
+  */
 void MASTERMIND_TASK () {
 	if (nav_flg == 5 && nav.flag == 0) {
 		corral_flg = 2;
@@ -140,6 +146,9 @@ void MASTERMIND_TASK () {
 	}
 }
 
+/**
+  * @brief Navigation task controls the desired position of robot
+  */
 void NAV_TASK(){
 	if(blue1.status == '1'){
 		nav_Update_PID(&nav);
@@ -188,6 +197,10 @@ void NAV_TASK(){
 	}
 }
 
+/**
+  * @brief Tasks for the Corral module.
+  * @param SERVO_obj Servo object associated with the corral.
+  */
 void CORRAL_TASK(Servo& SERVO_obj) {
 	if(blue1.status == '1'){
 		// 45deg => 0deg
@@ -203,15 +216,23 @@ void CORRAL_TASK(Servo& SERVO_obj) {
 
 }
 
-
-
-
+/**
+  * @brief Tasks for the Motor module.
+  * @param motor1 First motor object.
+  * @param motor2 Second motor object.
+  * @param motor3 Third motor object.
+  */
 void MOTOR_TASK(motor_drv_t* motor1, motor_drv_t* motor2, motor_drv_t* motor3) {
 	  setPWM(motor1);
 	  setPWM(motor2);
 	  setPWM(motor3);
 }
 
+/**
+  * @brief Sorts colelcted balls
+  * @param RGB_obj RGB sensor object.
+  * @param SERVO_obj Servo object associated with the sort module.
+  */
 void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
 	if(blue1.status == '1'){
 		if (sort_flg != 0) {
@@ -270,6 +291,11 @@ void SORT_TASK(APDS9960& RGB_obj, Servo& SERVO_obj) {
   * @brief  The application entry point.
   * @retval int
   */
+
+ /**
+  * @brief The application entry point.
+  * @retval int Return code
+  */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -306,18 +332,13 @@ int main(void)
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
 
+  //////// INTITIALIZATION //////////////////////////////
   SERVO_SORT.initialize();
   SERVO_SORT.setAngle(90,2000);
 
   SERVO_CORRAL.max_rot = 270;
   SERVO_CORRAL.initialize();
   SERVO_CORRAL.setAngle(45,2000); //start in upright position TODO: move to mastermind at some point
-
-
-
-
-
-
 
 
   // Start UART
@@ -882,6 +903,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/**
+ * @brief Transmit a string message via UART interface.
+ * 
+ * This function appends a line terminator ("\r\n") to the string 
+ * and sends it via the UART interface.
+ *
+ * @param message Null-terminated string to transmit.
+ */
 void usrprint(const char* message)
 {
     // Create a buffer for the complete message with \r\n
@@ -893,6 +922,14 @@ void usrprint(const char* message)
     delete[] completeMessage; // Release the dynamically allocated memory
 }
 
+/**
+ * @brief Transmit a uint32_t value via UART interface.
+ *
+ * This function converts the uint32_t value to string and sends 
+ * it via the UART interface.
+ *
+ * @param value The uint32_t value to transmit.
+ */
 void usrprint(uint32_t value)
 {
     char stringValue[30];
@@ -901,6 +938,15 @@ void usrprint(uint32_t value)
     usrprint(stringValue);
 }
 
+/**
+ * @brief Transmit a formatted string via UART interface.
+ *
+ * This function formats a string using a provided format and a uint32_t value. 
+ * The formatted string is then sent via the UART interface.
+ *
+ * @param message A format string for sprintf.
+ * @param value The uint32_t value to be used with the format string.
+ */
 void usrprint(const char* message,uint32_t value)
 {
     char stringValue[30];
@@ -908,6 +954,7 @@ void usrprint(const char* message,uint32_t value)
     // Print the value
     usrprint(stringValue);
 }
+
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
