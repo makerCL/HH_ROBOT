@@ -1,12 +1,12 @@
 
 #include "APDS9960.h"
-    /**
-     * @brief APDS9960 constructor
-     * 
-     * @param i2cHandle I2C handler 
-     * @param uartHandle UART handler 
-     * @param Atime Integration time for photodiode
-     */
+	/**
+	* @brief APDS9960 constructor
+	*
+	* @param i2cHandle I2C handler
+	* @param uartHandle UART handler
+	* @param Atime Integration time for photodiode
+	*/
 APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle, uint16_t Atime) {
 
 	hi2c = i2cHandle;
@@ -18,11 +18,11 @@ APDS9960::APDS9960(I2C_HandleTypeDef* i2cHandle, UART_HandleTypeDef* uartHandle,
 	initialize();
 }
 
-    /**
- * @brief Initialize the APDS9960 sensor
- * 
- * @return uint8_t Returns 1 if initialization is successful, 0 otherwise
- */
+	/**
+	* @brief Initialize the APDS9960 sensor
+	*
+	* @return uint8_t Returns 1 if initialization is successful, 0 otherwise
+	*/
 uint8_t APDS9960::initialize() {
 
 	uint8_t id = readReg(0x92);

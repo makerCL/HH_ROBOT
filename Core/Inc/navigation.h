@@ -61,15 +61,6 @@ int32_t PID_runController(PID_drv_t* PID_drv, int32_t curr_posn);
 
 
 
-int16_t nav_Line_If_Rot(nav_drv_t* nav_drv, int16_t theta);
-
-void nav_Update_World(nav_drv_t* nav_drv);
-
-
-
-
-
-
 
 #endif /* INC_NAVIGATION_H_ */
 

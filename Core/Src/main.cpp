@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : main.c
+  * @file           : main.cpp
   * @brief          : Main program body
   ******************************************************************************
   * @attention
@@ -67,8 +67,6 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
-
-/////// INITIALIZATION ////////////////////////////////////
 uint8_t sort_flg = 1;
 uint8_t corral_flg = 1;
 uint8_t nav_flg = 1;
@@ -955,7 +953,14 @@ void usrprint(const char* message,uint32_t value)
     usrprint(stringValue);
 }
 
-
+/**
+ * @brief Rx Transfer completed callback.
+ *
+ * This function is used to recreate a uart transfer interrupt for both uarts: huart1 and huart6
+ * Check which version of the UART triggered this callback
+ *
+ * @param huart UART handle.
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	// Check which version of the UART triggered this callback
 	if(huart == &huart1){
@@ -968,6 +973,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
 	}
 }
 
+/**
+ * @brief Period elapsed callback in non-blocking mode. Callback: timer has rolled over
+ *
+ * This function is used to keep track of when timers overflow.
+ * We have two timers that cause interrupt triggers a second and a millisecond timer
+ * This timer is used for printing not as quickly updating operation states and flags. As well as keeping track of the state of the deadman switch.
+ *
+ *
+ * @param htim TIM handle.
+ */
 // Callback: timer has rolled over
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   // Check which version of the timer triggered this callback
@@ -999,6 +1014,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
     }
 }
+
+/**
+ * @brief EXTI line detection callback.
+ *
+ * Used for updating line followers and updating encoders on every rising and falling edge.
+ *
+ * @param GPIO_Pin Specifies the port pin connected to corresponding EXTI line.
+ */
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin){
 	if (GPIO_Pin == RIGHT_LINE_OUT_Pin){
