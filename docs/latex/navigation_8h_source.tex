@@ -1,0 +1,72 @@
+\hypertarget{navigation_8h_source}{}\doxysection{navigation.\+h}
+\label{navigation_8h_source}\index{Core/Inc/navigation.h@{Core/Inc/navigation.h}}
+\mbox{\hyperlink{navigation_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef INC\_NAVIGATION\_H\_}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define INC\_NAVIGATION\_H\_}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include "{}stdint.h"{}}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#include "{}stm32f4xx\_hal.h"{}}}
+\DoxyCodeLine{6 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{motor__driver_8h}{motor\_driver.h}}"{}}}
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{encoder__driver_8h}{encoder\_driver.h}}"{}}}
+\DoxyCodeLine{8 }
+\DoxyCodeLine{9 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{struct_p_i_d__drv}{PID\_drv}}\{}
+\DoxyCodeLine{10     int32\_t \mbox{\hyperlink{struct_p_i_d__drv_a9072720a1d3a0fa52c6eb0889d930dda}{last\_error}}; \textcolor{comment}{// for derivative control}}
+\DoxyCodeLine{11     int32\_t \mbox{\hyperlink{struct_p_i_d__drv_a41abeecea3dbd431fa7198afe18748f1}{error\_sum}};}
+\DoxyCodeLine{12     int32\_t \mbox{\hyperlink{struct_p_i_d__drv_af8449b8819cf61d238ee6c3c38278d9a}{setpoint}};}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14     \textcolor{keywordtype}{float} \mbox{\hyperlink{struct_p_i_d__drv_af336cdb247871b9bc999b1af0d4ecded}{k\_p}};}
+\DoxyCodeLine{15     \textcolor{keywordtype}{float} \mbox{\hyperlink{struct_p_i_d__drv_a69152667258407f5b7f42858faec5b7d}{k\_i}};}
+\DoxyCodeLine{16     \textcolor{keywordtype}{float} \mbox{\hyperlink{struct_p_i_d__drv_afbca8c245b6ab8178c4afc542d3876ac}{k\_d}};}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18     int16\_t \mbox{\hyperlink{struct_p_i_d__drv_ad9169b7771f5492a5c6d7b6697a14bec}{tol}};}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \} \mbox{\hyperlink{navigation_8h_a73854536db300ea186c7ec7bd2d4e727}{PID\_drv\_t}};}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 }
+\DoxyCodeLine{23 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structworld__drv}{world\_drv}}\{}
+\DoxyCodeLine{24     \textcolor{keywordtype}{double}          \mbox{\hyperlink{structworld__drv_a76f8b753ccf829c3ca651f5085d34979}{x\_tot\_pos}};}
+\DoxyCodeLine{25     \textcolor{keywordtype}{double}          \mbox{\hyperlink{structworld__drv_a2855d3f1dcf53bde4674ae173acb14be}{y\_tot\_pos}};}
+\DoxyCodeLine{26     \textcolor{keywordtype}{double}          \mbox{\hyperlink{structworld__drv_ac4b2d4776c2b987065bd5fb98c0cd0d8}{theta}};}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28     int16\_t         \mbox{\hyperlink{structworld__drv_a61249a24bcd8e091eb3e45b86875751f}{r\_max}};}
+\DoxyCodeLine{29     int16\_t         \mbox{\hyperlink{structworld__drv_a1e1a95891ba747f0ee3eb56bb1d7e3f4}{r\_min}};}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31     \textcolor{keywordtype}{double}          \mbox{\hyperlink{structworld__drv_acf341b07749dde5da0f19816e73840bb}{x\_home}};}
+\DoxyCodeLine{32     \textcolor{keywordtype}{double}         \mbox{\hyperlink{structworld__drv_a75fadccbcc91ab7e901f3802ae3f5a54}{y\_home}};}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{34     \textcolor{keywordtype}{float}           \mbox{\hyperlink{structworld__drv_a9c2ad9ce5a79a0256188ef3c8bad25de}{ticksPerDeg}};}
+\DoxyCodeLine{35     \textcolor{keywordtype}{float}           \mbox{\hyperlink{structworld__drv_a3421e94652d4c1cec3c1d1efb1c09e3f}{ticksPerinch}};}
+\DoxyCodeLine{36 }
+\DoxyCodeLine{37 \} \mbox{\hyperlink{navigation_8h_a6f5719f3f10d018f74382cbfb33eb721}{world\_drv\_t}};}
+\DoxyCodeLine{38 }
+\DoxyCodeLine{39 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structnav__drv}{nav\_drv}}\{}
+\DoxyCodeLine{40     \mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}*     \mbox{\hyperlink{structnav__drv_abfe52c3668af287397778402299780fa}{motor1}};}
+\DoxyCodeLine{41     \mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}*     \mbox{\hyperlink{structnav__drv_a613efae21d23ec8c008eac777e32b39e}{motor2}};}
+\DoxyCodeLine{42     \mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}}*     \mbox{\hyperlink{structnav__drv_adc71763300d4e97207c9a934b5d1545c}{encoder1}};}
+\DoxyCodeLine{43     \mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}}*     \mbox{\hyperlink{structnav__drv_a9e880c54a4cd40f863de2f5cd54ef9bd}{encoder2}};}
+\DoxyCodeLine{44     \mbox{\hyperlink{struct_p_i_d__drv}{PID\_drv\_t}}*         \mbox{\hyperlink{structnav__drv_ab56a81415c9f01631a0043febb0f5c09}{PID1}};}
+\DoxyCodeLine{45     \mbox{\hyperlink{struct_p_i_d__drv}{PID\_drv\_t}}*         \mbox{\hyperlink{structnav__drv_a5e08248156b6ac8a227ab71a9f4edc1f}{PID2}};}
+\DoxyCodeLine{46 }
+\DoxyCodeLine{47     \mbox{\hyperlink{structworld__drv}{world\_drv\_t}}* \mbox{\hyperlink{structnav__drv_a54ca6f18700b7e0a5730070fbdcabf3a}{world}};}
+\DoxyCodeLine{48     uint8\_t         \mbox{\hyperlink{structnav__drv_af71ad4b7fdea4ad19792bb270e4fc2da}{flag}};}
+\DoxyCodeLine{49 }
+\DoxyCodeLine{50 \} \mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\_drv\_t}};}
+\DoxyCodeLine{51 }
+\DoxyCodeLine{52 \textcolor{keywordtype}{void} \mbox{\hyperlink{navigation_8h_ab6daf41bbb710f28941b41aeec710b0e}{nav\_Rot}}(\mbox{\hyperlink{structnav__drv}{nav\_drv\_t}}* \mbox{\hyperlink{structnav__drv}{nav\_drv}}, \textcolor{keywordtype}{float} deg);}
+\DoxyCodeLine{53 }
+\DoxyCodeLine{54 \textcolor{keywordtype}{void} \mbox{\hyperlink{navigation_8h_a37ae7144f2e472805f6101cea20dcab1}{nav\_Lin}}(\mbox{\hyperlink{structnav__drv}{nav\_drv\_t}}* \mbox{\hyperlink{structnav__drv}{nav\_drv}}, \textcolor{keywordtype}{float} inches);}
+\DoxyCodeLine{55 }
+\DoxyCodeLine{56 \textcolor{keywordtype}{void} \mbox{\hyperlink{navigation_8h_a59925d95b40e63354805f4031504cd46}{nav\_Update\_PID}}(\mbox{\hyperlink{structnav__drv}{nav\_drv\_t}}* \mbox{\hyperlink{structnav__drv}{nav\_drv}});}
+\DoxyCodeLine{57 }
+\DoxyCodeLine{58 \textcolor{keywordtype}{void} \mbox{\hyperlink{navigation_8h_af8e6930730bca914eefcfafd29c1c4f4}{nav\_Update\_Flag}}(\mbox{\hyperlink{structnav__drv}{nav\_drv\_t}}* \mbox{\hyperlink{structnav__drv}{nav\_drv}});}
+\DoxyCodeLine{59 }
+\DoxyCodeLine{60 int32\_t \mbox{\hyperlink{navigation_8h_a3a437ef69870a72a768eaf41ad7f5ab2}{PID\_runController}}(\mbox{\hyperlink{struct_p_i_d__drv}{PID\_drv\_t}}* \mbox{\hyperlink{struct_p_i_d__drv}{PID\_drv}}, int32\_t curr\_posn);}
+\DoxyCodeLine{61 }
+\DoxyCodeLine{62 }
+\DoxyCodeLine{63 }
+\DoxyCodeLine{64 }
+\DoxyCodeLine{65 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* INC\_NAVIGATION\_H\_ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{66 }
+
+\end{DoxyCode}

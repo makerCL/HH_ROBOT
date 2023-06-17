@@ -1,0 +1,30 @@
+\hypertarget{line__driver_8h_source}{}\doxysection{line\+\_\+driver.\+h}
+\label{line__driver_8h_source}\index{Core/Inc/line\_driver.h@{Core/Inc/line\_driver.h}}
+\mbox{\hyperlink{line__driver_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{ * line\_driver.h}}
+\DoxyCodeLine{3 \textcolor{comment}{ *}}
+\DoxyCodeLine{4 \textcolor{comment}{ *  Created on: May 31, 2023}}
+\DoxyCodeLine{5 \textcolor{comment}{ *      Author: johna}}
+\DoxyCodeLine{6 \textcolor{comment}{ */}}
+\DoxyCodeLine{7 }
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#ifndef INC\_LINE\_DRIVER\_H\_}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#define INC\_LINE\_DRIVER\_H\_}}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include "{}stdint.h"{}}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include "{}stm32f4xx\_hal.h"{}}}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structline__drv}{line\_drv}} \{}
+\DoxyCodeLine{15     \textcolor{keywordtype}{char}                \mbox{\hyperlink{structline__drv_a5a00a2f9d7f0357a03f2b36b0f48b74c}{state}};}
+\DoxyCodeLine{16     GPIO\_TypeDef*       \mbox{\hyperlink{structline__drv_a33b32ff4d2fb1388f27682144ce537ba}{GPIOx}};}
+\DoxyCodeLine{17     uint16\_t            \mbox{\hyperlink{structline__drv_a292b896372827bbff018521b672cba64}{GPIO\_Pin}};}
+\DoxyCodeLine{18 \} \mbox{\hyperlink{line__driver_8h_a6afe360ce6e86a41cc3e6553facd7571}{line\_drv\_t}};}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{keywordtype}{void} \mbox{\hyperlink{line__driver_8h_ae3bbb44adec262325ab98c704f977c0c}{update\_Line}}(\mbox{\hyperlink{structline__drv}{line\_drv\_t}}* \mbox{\hyperlink{structline__drv}{line\_drv}});}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{keywordtype}{void} \mbox{\hyperlink{line__driver_8h_aaee0974dad719e404ddcd38c0803f59a}{print\_LineF}}(\mbox{\hyperlink{structline__drv}{line\_drv\_t}}* \mbox{\hyperlink{structline__drv}{line\_drv}}, UART\_HandleTypeDef* huart);}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* INC\_LINE\_DRIVER\_H\_ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

@@ -1,0 +1,30 @@
+\hypertarget{bluetooth__driver_8h_source}{}\doxysection{bluetooth\+\_\+driver.\+h}
+\label{bluetooth__driver_8h_source}\index{Core/Inc/bluetooth\_driver.h@{Core/Inc/bluetooth\_driver.h}}
+\mbox{\hyperlink{bluetooth__driver_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{ * bluetooth\_driver.h}}
+\DoxyCodeLine{3 \textcolor{comment}{ *}}
+\DoxyCodeLine{4 \textcolor{comment}{ *  Created on: May 23, 2023}}
+\DoxyCodeLine{5 \textcolor{comment}{ *      Author: johna}}
+\DoxyCodeLine{6 \textcolor{comment}{ */}}
+\DoxyCodeLine{7 }
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#ifndef INC\_BLUETOOTH\_DRIVER\_H\_}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#define INC\_BLUETOOTH\_DRIVER\_H\_}}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include "{}stdint.h"{}}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include "{}stm32f4xx\_hal.h"{}}}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structblue__drv}{blue\_drv}} \{}
+\DoxyCodeLine{15     \textcolor{keywordtype}{char}            \mbox{\hyperlink{structblue__drv_af778eef31f5eef467068ed975f0aed37}{status}};}
+\DoxyCodeLine{16     \textcolor{keywordtype}{char}            \mbox{\hyperlink{structblue__drv_ae95e5e5ef027aea4de3ce367a1541c45}{cur\_state}};}
+\DoxyCodeLine{17     \textcolor{keywordtype}{char}*           \mbox{\hyperlink{structblue__drv_a3399c465d692fc45a1946ee898f4842f}{blue\_char\_ptr}};}
+\DoxyCodeLine{18 \} \mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\_drv\_t}};}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{keywordtype}{void} \mbox{\hyperlink{bluetooth__driver_8h_aba0f0391811ede76e41494b4e495a290}{updateStatus}}(\mbox{\hyperlink{structblue__drv}{blue\_drv\_t}}* \mbox{\hyperlink{structblue__drv}{blue\_drv}});}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{keywordtype}{void} \mbox{\hyperlink{bluetooth__driver_8h_a2e485e37008f82b51d94fadc24b3f36c}{print\_Blue}}(\mbox{\hyperlink{structblue__drv}{blue\_drv\_t}}* \mbox{\hyperlink{structblue__drv}{blue\_drv}}, UART\_HandleTypeDef* huart);}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* INC\_BLUETOOTH\_DRIVER\_H\_ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

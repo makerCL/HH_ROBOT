@@ -1,0 +1,118 @@
+\hypertarget{navigation_8cpp}{}\doxysection{Core/\+Src/navigation.cpp File Reference}
+\label{navigation_8cpp}\index{Core/Src/navigation.cpp@{Core/Src/navigation.cpp}}
+
+
+\+: navigation driver  
+
+
+{\ttfamily \#include \char`\"{}navigation.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$cmath$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{navigation_8cpp_ab6daf41bbb710f28941b41aeec710b0e}{nav\+\_\+\+Rot}} (\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}}, float deg)
+\begin{DoxyCompactList}\small\item\em Rotates robot a set number of degrees counter clockwise. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{navigation_8cpp_a37ae7144f2e472805f6101cea20dcab1}{nav\+\_\+\+Lin}} (\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}}, float inches)
+\begin{DoxyCompactList}\small\item\em Moves robot a set number of inches forward. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{navigation_8cpp_a59925d95b40e63354805f4031504cd46}{nav\+\_\+\+Update\+\_\+\+PID}} (\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Updates new PWM Signals to motors specified by PID controller. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{navigation_8cpp_af8e6930730bca914eefcfafd29c1c4f4}{nav\+\_\+\+Update\+\_\+\+Flag}} (\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Checks if PID Control is complete under specified tolerance and updates flag. \end{DoxyCompactList}\item 
+int32\+\_\+t \mbox{\hyperlink{navigation_8cpp_a3a437ef69870a72a768eaf41ad7f5ab2}{PID\+\_\+run\+Controller}} (\mbox{\hyperlink{navigation_8h_a73854536db300ea186c7ec7bd2d4e727}{PID\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{struct_p_i_d__drv}{PID\+\_\+drv}}, int32\+\_\+t curr\+\_\+posn)
+\begin{DoxyCompactList}\small\item\em Runs PID Controller to calculate output for new PWM control. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: navigation driver 
+
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+\begin{DoxyAuthor}{Author}
+John Bennett 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{navigation_8cpp_a37ae7144f2e472805f6101cea20dcab1}\label{navigation_8cpp_a37ae7144f2e472805f6101cea20dcab1}} 
+\index{navigation.cpp@{navigation.cpp}!nav\_Lin@{nav\_Lin}}
+\index{nav\_Lin@{nav\_Lin}!navigation.cpp@{navigation.cpp}}
+\doxysubsubsection{\texorpdfstring{nav\_Lin()}{nav\_Lin()}}
+{\footnotesize\ttfamily void nav\+\_\+\+Lin (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$}]{nav\+\_\+drv,  }\item[{float}]{inches }\end{DoxyParamCaption})}
+
+
+
+Moves robot a set number of inches forward. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}}} & navigation driver structure. \\
+\hline
+{\em inches} & to move forward. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{navigation_8cpp_ab6daf41bbb710f28941b41aeec710b0e}\label{navigation_8cpp_ab6daf41bbb710f28941b41aeec710b0e}} 
+\index{navigation.cpp@{navigation.cpp}!nav\_Rot@{nav\_Rot}}
+\index{nav\_Rot@{nav\_Rot}!navigation.cpp@{navigation.cpp}}
+\doxysubsubsection{\texorpdfstring{nav\_Rot()}{nav\_Rot()}}
+{\footnotesize\ttfamily void nav\+\_\+\+Rot (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$}]{nav\+\_\+drv,  }\item[{float}]{deg }\end{DoxyParamCaption})}
+
+
+
+Rotates robot a set number of degrees counter clockwise. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}}} & navigation driver structure. \\
+\hline
+{\em deg} & specified degrees to turn. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{navigation_8cpp_af8e6930730bca914eefcfafd29c1c4f4}\label{navigation_8cpp_af8e6930730bca914eefcfafd29c1c4f4}} 
+\index{navigation.cpp@{navigation.cpp}!nav\_Update\_Flag@{nav\_Update\_Flag}}
+\index{nav\_Update\_Flag@{nav\_Update\_Flag}!navigation.cpp@{navigation.cpp}}
+\doxysubsubsection{\texorpdfstring{nav\_Update\_Flag()}{nav\_Update\_Flag()}}
+{\footnotesize\ttfamily void nav\+\_\+\+Update\+\_\+\+Flag (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$}]{nav\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Checks if PID Control is complete under specified tolerance and updates flag. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}}} & navigation driver structure. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{navigation_8cpp_a59925d95b40e63354805f4031504cd46}\label{navigation_8cpp_a59925d95b40e63354805f4031504cd46}} 
+\index{navigation.cpp@{navigation.cpp}!nav\_Update\_PID@{nav\_Update\_PID}}
+\index{nav\_Update\_PID@{nav\_Update\_PID}!navigation.cpp@{navigation.cpp}}
+\doxysubsubsection{\texorpdfstring{nav\_Update\_PID()}{nav\_Update\_PID()}}
+{\footnotesize\ttfamily void nav\+\_\+\+Update\+\_\+\+PID (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{navigation_8h_a71d9e5e949f99880d96b70ef4454cd37}{nav\+\_\+drv\+\_\+t}} $\ast$}]{nav\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Updates new PWM Signals to motors specified by PID controller. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structnav__drv}{nav\+\_\+drv}}} & navigation driver structure. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{navigation_8cpp_a3a437ef69870a72a768eaf41ad7f5ab2}\label{navigation_8cpp_a3a437ef69870a72a768eaf41ad7f5ab2}} 
+\index{navigation.cpp@{navigation.cpp}!PID\_runController@{PID\_runController}}
+\index{PID\_runController@{PID\_runController}!navigation.cpp@{navigation.cpp}}
+\doxysubsubsection{\texorpdfstring{PID\_runController()}{PID\_runController()}}
+{\footnotesize\ttfamily int32\+\_\+t PID\+\_\+run\+Controller (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{navigation_8h_a73854536db300ea186c7ec7bd2d4e727}{PID\+\_\+drv\+\_\+t}} $\ast$}]{PID\+\_\+drv,  }\item[{int32\+\_\+t}]{curr\+\_\+posn }\end{DoxyParamCaption})}
+
+
+
+Runs PID Controller to calculate output for new PWM control. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{struct_p_i_d__drv}{PID\+\_\+drv}}} & PID driver structure. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int32\+\_\+t calculated 32 bit PWM Value. 
+\end{DoxyReturn}

@@ -1,0 +1,47 @@
+\hypertarget{encoder__driver_8h_source}{}\doxysection{encoder\+\_\+driver.\+h}
+\label{encoder__driver_8h_source}\index{Core/Inc/encoder\_driver.h@{Core/Inc/encoder\_driver.h}}
+\mbox{\hyperlink{encoder__driver_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{ * encoder\_driver.h}}
+\DoxyCodeLine{3 \textcolor{comment}{ *}}
+\DoxyCodeLine{4 \textcolor{comment}{ *  Created on: Jun 2, 2023}}
+\DoxyCodeLine{5 \textcolor{comment}{ *      Author: johna}}
+\DoxyCodeLine{6 \textcolor{comment}{ */}}
+\DoxyCodeLine{7 }
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#ifndef INC\_ENCODER\_DRIVER\_H\_}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#define INC\_ENCODER\_DRIVER\_H\_}}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include "{}stdint.h"{}}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include "{}stm32f4xx\_hal.h"{}}}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structencoder__drv}{encoder\_drv}} \{}
+\DoxyCodeLine{15     int32\_t             \mbox{\hyperlink{structencoder__drv_a994f754aa9c93218f05669e18dbb03e2}{TOTAL\_COUNT}};}
+\DoxyCodeLine{16     int32\_t             \mbox{\hyperlink{structencoder__drv_a90bc0a9a15f48e16fd5659c93185716d}{LAST\_COUNT}};}
+\DoxyCodeLine{17     uint8\_t             \mbox{\hyperlink{structencoder__drv_af9acc2e5ad7d3bef3a4af5af9e1dcfe5}{LAST\_ENCODER\_COUNT}};}
+\DoxyCodeLine{18 }
+\DoxyCodeLine{19     uint16\_t            \mbox{\hyperlink{structencoder__drv_a5721ef536735bc08932ec66272ad6629}{GPIO\_Pin1}};}
+\DoxyCodeLine{20     GPIO\_TypeDef*       \mbox{\hyperlink{structencoder__drv_a0a82b4ef879dc3d07d1b841c719f3e5a}{GPIOx1}};}
+\DoxyCodeLine{21     uint16\_t            \mbox{\hyperlink{structencoder__drv_ae67673164801bb2ecb0f07200c66f75c}{GPIO\_Pin2}};}
+\DoxyCodeLine{22     GPIO\_TypeDef*       \mbox{\hyperlink{structencoder__drv_a9fc4b21e39612349133ebe4a9f1ca16a}{GPIOx2}};}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24     int32\_t             \mbox{\hyperlink{structencoder__drv_a06c3807e666daacc7e8aae15ad32bb62}{TPR}};}
+\DoxyCodeLine{25     \textcolor{keywordtype}{double}              \mbox{\hyperlink{structencoder__drv_af190056841ae27d91c107300af0c9963}{pos}};}
+\DoxyCodeLine{26 \} \mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\_drv\_t}};}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28 \mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}} \mbox{\hyperlink{encoder__driver_8h_a7d18d06404ef86edadffe61aa60ebc8a}{init\_encoder}}(uint16\_t    GPIO\_Pin1, GPIO\_TypeDef* GPIOx1, uint16\_t GPIO\_Pin2, GPIO\_TypeDef* GPIOx2, int32\_t TPR);}
+\DoxyCodeLine{29 }
+\DoxyCodeLine{30 \textcolor{keywordtype}{void} \mbox{\hyperlink{encoder__driver_8h_a1315b541b1d72e762edc9103e954f8fd}{update\_encoder}}(\mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}}* \mbox{\hyperlink{structencoder__drv}{encoder\_drv}});}
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 \textcolor{comment}{//void print\_encoder(encoder\_drv\_t* encoder\_drv);}}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{34 \textcolor{keywordtype}{void} \mbox{\hyperlink{encoder__driver_8h_a51b63d2c8dabd752ce3ff3d3afffd56a}{Update\_Encoder\_State}}(\mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}}* \mbox{\hyperlink{structencoder__drv}{encoder\_drv}});}
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36 \textcolor{keywordtype}{void} \mbox{\hyperlink{encoder__driver_8h_a4c29dbbf2edd93f6f4599e2d3b28a2a2}{zero}}(\mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}}* \mbox{\hyperlink{structencoder__drv}{encoder\_drv}});}
+\DoxyCodeLine{37 }
+\DoxyCodeLine{38 uint8\_t \mbox{\hyperlink{encoder__driver_8h_ae6bfab62e135e7e530e3e6b8802cdb70}{NewState}}(\mbox{\hyperlink{structencoder__drv}{encoder\_drv\_t}}* \mbox{\hyperlink{structencoder__drv}{encoder\_drv}});}
+\DoxyCodeLine{39 }
+\DoxyCodeLine{40 }
+\DoxyCodeLine{41 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* INC\_ENCODER\_DRIVER\_H\_ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

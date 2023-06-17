@@ -1,0 +1,65 @@
+\hypertarget{bluetooth__driver_8h}{}\doxysection{Core/\+Inc/bluetooth\+\_\+driver.h File Reference}
+\label{bluetooth__driver_8h}\index{Core/Inc/bluetooth\_driver.h@{Core/Inc/bluetooth\_driver.h}}
+{\ttfamily \#include \char`\"{}stdint.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stm32f4xx\+\_\+hal.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}} \mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\+\_\+drv\+\_\+t}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{bluetooth__driver_8h_aba0f0391811ede76e41494b4e495a290}{update\+Status}} (\mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Updates blue\+\_\+tooth status. (\textquotesingle{}0\textquotesingle{} off and \textquotesingle{}1\textquotesingle{} is on) checks if off signal is sent or the presence of a bluetooth connection to determine status. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{bluetooth__driver_8h_a2e485e37008f82b51d94fadc24b3f36c}{print\+\_\+\+Blue}} (\mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}}, UART\+\_\+\+Handle\+Type\+Def $\ast$huart)
+\begin{DoxyCompactList}\small\item\em Prints Bluetooth status thru UART. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}\label{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}} 
+\index{bluetooth\_driver.h@{bluetooth\_driver.h}!blue\_drv\_t@{blue\_drv\_t}}
+\index{blue\_drv\_t@{blue\_drv\_t}!bluetooth\_driver.h@{bluetooth\_driver.h}}
+\doxysubsubsection{\texorpdfstring{blue\_drv\_t}{blue\_drv\_t}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}} \mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\+\_\+drv\+\_\+t}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{bluetooth__driver_8h_a2e485e37008f82b51d94fadc24b3f36c}\label{bluetooth__driver_8h_a2e485e37008f82b51d94fadc24b3f36c}} 
+\index{bluetooth\_driver.h@{bluetooth\_driver.h}!print\_Blue@{print\_Blue}}
+\index{print\_Blue@{print\_Blue}!bluetooth\_driver.h@{bluetooth\_driver.h}}
+\doxysubsubsection{\texorpdfstring{print\_Blue()}{print\_Blue()}}
+{\footnotesize\ttfamily void print\+\_\+\+Blue (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\+\_\+drv\+\_\+t}} $\ast$}]{blue\+\_\+drv,  }\item[{UART\+\_\+\+Handle\+Type\+Def $\ast$}]{huart }\end{DoxyParamCaption})}
+
+
+
+Prints Bluetooth status thru UART. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}}} & bluetooth driver structure. \\
+\hline
+{\em uart\+Handle} & UART handler \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{bluetooth__driver_8h_aba0f0391811ede76e41494b4e495a290}\label{bluetooth__driver_8h_aba0f0391811ede76e41494b4e495a290}} 
+\index{bluetooth\_driver.h@{bluetooth\_driver.h}!updateStatus@{updateStatus}}
+\index{updateStatus@{updateStatus}!bluetooth\_driver.h@{bluetooth\_driver.h}}
+\doxysubsubsection{\texorpdfstring{updateStatus()}{updateStatus()}}
+{\footnotesize\ttfamily void update\+Status (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{bluetooth__driver_8h_a5033c0a34b5c55626131dc0992e82731}{blue\+\_\+drv\+\_\+t}} $\ast$}]{blue\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Updates blue\+\_\+tooth status. (\textquotesingle{}0\textquotesingle{} off and \textquotesingle{}1\textquotesingle{} is on) checks if off signal is sent or the presence of a bluetooth connection to determine status. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structblue__drv}{blue\+\_\+drv}}} & bluetooth driver structure. \\
+\hline
+\end{DoxyParams}

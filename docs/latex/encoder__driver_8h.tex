@@ -1,0 +1,128 @@
+\hypertarget{encoder__driver_8h}{}\doxysection{Core/\+Inc/encoder\+\_\+driver.h File Reference}
+\label{encoder__driver_8h}\index{Core/Inc/encoder\_driver.h@{Core/Inc/encoder\_driver.h}}
+{\ttfamily \#include \char`\"{}stdint.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stm32f4xx\+\_\+hal.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}} \mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} \mbox{\hyperlink{encoder__driver_8h_a7d18d06404ef86edadffe61aa60ebc8a}{init\+\_\+encoder}} (uint16\+\_\+t GPIO\+\_\+\+Pin1, GPIO\+\_\+\+Type\+Def $\ast$GPIOx1, uint16\+\_\+t GPIO\+\_\+\+Pin2, GPIO\+\_\+\+Type\+Def $\ast$GPIOx2, int32\+\_\+t TPR)
+\begin{DoxyCompactList}\small\item\em Creates an encoder structure. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{encoder__driver_8h_a1315b541b1d72e762edc9103e954f8fd}{update\+\_\+encoder}} (\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Updates Encoder Position increments TOTAL\+\_\+\+COUNT up or down depending on the LAST\+\_\+\+ENCODER\+\_\+\+COUNT. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{encoder__driver_8h_a51b63d2c8dabd752ce3ff3d3afffd56a}{Update\+\_\+\+Encoder\+\_\+\+State}} (\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Updates Encoder state manly updating the pos the number of revolution. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{encoder__driver_8h_a4c29dbbf2edd93f6f4599e2d3b28a2a2}{zero}} (\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em zeros encoder. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{encoder__driver_8h_ae6bfab62e135e7e530e3e6b8802cdb70}{New\+State}} (\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em represents encoder GPIO pin states as gray code then converts the gray code to a binary value representing encoder states. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}\label{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}} 
+\index{encoder\_driver.h@{encoder\_driver.h}!encoder\_drv\_t@{encoder\_drv\_t}}
+\index{encoder\_drv\_t@{encoder\_drv\_t}!encoder\_driver.h@{encoder\_driver.h}}
+\doxysubsubsection{\texorpdfstring{encoder\_drv\_t}{encoder\_drv\_t}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}} \mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{encoder__driver_8h_a7d18d06404ef86edadffe61aa60ebc8a}\label{encoder__driver_8h_a7d18d06404ef86edadffe61aa60ebc8a}} 
+\index{encoder\_driver.h@{encoder\_driver.h}!init\_encoder@{init\_encoder}}
+\index{init\_encoder@{init\_encoder}!encoder\_driver.h@{encoder\_driver.h}}
+\doxysubsubsection{\texorpdfstring{init\_encoder()}{init\_encoder()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} init\+\_\+encoder (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{GPIO\+\_\+\+Pin1,  }\item[{GPIO\+\_\+\+Type\+Def $\ast$}]{GPIOx1,  }\item[{uint16\+\_\+t}]{GPIO\+\_\+\+Pin2,  }\item[{GPIO\+\_\+\+Type\+Def $\ast$}]{GPIOx2,  }\item[{int32\+\_\+t}]{TPR }\end{DoxyParamCaption})}
+
+
+
+Creates an encoder structure. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em GPIO\+\_\+\+Pin1} & Specifies the port bit to be written for the first encoder output. \\
+\hline
+{\em GPIOx1} & Input of GPIOx where x can be (A..H) to select the GPIO peripheral of the second encoder \\
+\hline
+{\em GPIO\+\_\+\+Pin2} & Specifies the port bit to be written for the first encoder output. \\
+\hline
+{\em GPIOx2} & Input of GPIOx where x can be (A..H) to select the GPIO peripheral of the second encoder \\
+\hline
+{\em TPR} & conversion for ticks per revolution \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+encoder\+\_\+drv\+\_\+t Returns encoder driver structure 
+\end{DoxyReturn}
+\mbox{\Hypertarget{encoder__driver_8h_ae6bfab62e135e7e530e3e6b8802cdb70}\label{encoder__driver_8h_ae6bfab62e135e7e530e3e6b8802cdb70}} 
+\index{encoder\_driver.h@{encoder\_driver.h}!NewState@{NewState}}
+\index{NewState@{NewState}!encoder\_driver.h@{encoder\_driver.h}}
+\doxysubsubsection{\texorpdfstring{NewState()}{NewState()}}
+{\footnotesize\ttfamily uint8\+\_\+t New\+State (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$}]{encoder\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+represents encoder GPIO pin states as gray code then converts the gray code to a binary value representing encoder states. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}}} & encoder driver structure. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+uint8\+\_\+t Returns binary representation of pin state 
+\end{DoxyReturn}
+\mbox{\Hypertarget{encoder__driver_8h_a1315b541b1d72e762edc9103e954f8fd}\label{encoder__driver_8h_a1315b541b1d72e762edc9103e954f8fd}} 
+\index{encoder\_driver.h@{encoder\_driver.h}!update\_encoder@{update\_encoder}}
+\index{update\_encoder@{update\_encoder}!encoder\_driver.h@{encoder\_driver.h}}
+\doxysubsubsection{\texorpdfstring{update\_encoder()}{update\_encoder()}}
+{\footnotesize\ttfamily void update\+\_\+encoder (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$}]{encoder\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Updates Encoder Position increments TOTAL\+\_\+\+COUNT up or down depending on the LAST\+\_\+\+ENCODER\+\_\+\+COUNT. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}}} & encoder driver structure. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{encoder__driver_8h_a51b63d2c8dabd752ce3ff3d3afffd56a}\label{encoder__driver_8h_a51b63d2c8dabd752ce3ff3d3afffd56a}} 
+\index{encoder\_driver.h@{encoder\_driver.h}!Update\_Encoder\_State@{Update\_Encoder\_State}}
+\index{Update\_Encoder\_State@{Update\_Encoder\_State}!encoder\_driver.h@{encoder\_driver.h}}
+\doxysubsubsection{\texorpdfstring{Update\_Encoder\_State()}{Update\_Encoder\_State()}}
+{\footnotesize\ttfamily void Update\+\_\+\+Encoder\+\_\+\+State (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$}]{encoder\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Updates Encoder state manly updating the pos the number of revolution. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}}} & encoder driver structure. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{encoder__driver_8h_a4c29dbbf2edd93f6f4599e2d3b28a2a2}\label{encoder__driver_8h_a4c29dbbf2edd93f6f4599e2d3b28a2a2}} 
+\index{encoder\_driver.h@{encoder\_driver.h}!zero@{zero}}
+\index{zero@{zero}!encoder\_driver.h@{encoder\_driver.h}}
+\doxysubsubsection{\texorpdfstring{zero()}{zero()}}
+{\footnotesize\ttfamily void zero (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{encoder__driver_8h_ad6e226858a68433a05f1fd5d176f4f91}{encoder\+\_\+drv\+\_\+t}} $\ast$}]{encoder\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+zeros encoder. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structencoder__drv}{encoder\+\_\+drv}}} & encoder driver structure. \\
+\hline
+\end{DoxyParams}

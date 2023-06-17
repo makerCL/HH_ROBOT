@@ -1,0 +1,62 @@
+\hypertarget{line__driver_8cpp}{}\doxysection{Core/\+Src/line\+\_\+driver.cpp File Reference}
+\label{line__driver_8cpp}\index{Core/Src/line\_driver.cpp@{Core/Src/line\_driver.cpp}}
+
+
+\+: line driver  
+
+
+{\ttfamily \#include \char`\"{}line\+\_\+driver.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}string.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{line__driver_8cpp_ae3bbb44adec262325ab98c704f977c0c}{update\+\_\+\+Line}} (\mbox{\hyperlink{line__driver_8h_a6afe360ce6e86a41cc3e6553facd7571}{line\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structline__drv}{line\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Updates Line follower status. \textquotesingle{}0\textquotesingle{} off and \textquotesingle{}1\textquotesingle{} is on. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{line__driver_8cpp_aaee0974dad719e404ddcd38c0803f59a}{print\+\_\+\+LineF}} (\mbox{\hyperlink{line__driver_8h_a6afe360ce6e86a41cc3e6553facd7571}{line\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structline__drv}{line\+\_\+drv}}, UART\+\_\+\+Handle\+Type\+Def $\ast$huart)
+\begin{DoxyCompactList}\small\item\em Prints Line follower status thru UART. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: line driver 
+
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+\begin{DoxyAuthor}{Author}
+John Bennett 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{line__driver_8cpp_aaee0974dad719e404ddcd38c0803f59a}\label{line__driver_8cpp_aaee0974dad719e404ddcd38c0803f59a}} 
+\index{line\_driver.cpp@{line\_driver.cpp}!print\_LineF@{print\_LineF}}
+\index{print\_LineF@{print\_LineF}!line\_driver.cpp@{line\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{print\_LineF()}{print\_LineF()}}
+{\footnotesize\ttfamily void print\+\_\+\+LineF (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{line__driver_8h_a6afe360ce6e86a41cc3e6553facd7571}{line\+\_\+drv\+\_\+t}} $\ast$}]{line\+\_\+drv,  }\item[{UART\+\_\+\+Handle\+Type\+Def $\ast$}]{huart }\end{DoxyParamCaption})}
+
+
+
+Prints Line follower status thru UART. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structline__drv}{line\+\_\+drv}}} & line follower driver structure. \\
+\hline
+{\em uart\+Handle} & UART handler \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{line__driver_8cpp_ae3bbb44adec262325ab98c704f977c0c}\label{line__driver_8cpp_ae3bbb44adec262325ab98c704f977c0c}} 
+\index{line\_driver.cpp@{line\_driver.cpp}!update\_Line@{update\_Line}}
+\index{update\_Line@{update\_Line}!line\_driver.cpp@{line\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{update\_Line()}{update\_Line()}}
+{\footnotesize\ttfamily void update\+\_\+\+Line (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{line__driver_8h_a6afe360ce6e86a41cc3e6553facd7571}{line\+\_\+drv\+\_\+t}} $\ast$}]{line\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Updates Line follower status. \textquotesingle{}0\textquotesingle{} off and \textquotesingle{}1\textquotesingle{} is on. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structline__drv}{line\+\_\+drv}}} & bluetooth driver structure. \\
+\hline
+\end{DoxyParams}

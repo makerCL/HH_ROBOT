@@ -1,0 +1,39 @@
+\hypertarget{servo__driver_8h_source}{}\doxysection{servo\+\_\+driver.\+h}
+\label{servo__driver_8h_source}\index{Core/Inc/servo\_driver.h@{Core/Inc/servo\_driver.h}}
+\mbox{\hyperlink{servo__driver_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef SERVO\_DRIVER\_H}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define SERVO\_DRIVER\_H}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include "{}stm32f4xx\_hal.h"{}}}
+\DoxyCodeLine{5 }
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{keyword}{class }\mbox{\hyperlink{class_servo}{Servo}} \{}
+\DoxyCodeLine{8 \textcolor{keyword}{public}:}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10   \mbox{\hyperlink{class_servo_a90cd628aa942214457b8c01e66fdb340}{Servo}}(TIM\_HandleTypeDef* PWMHandle, uint32\_t channel);}
+\DoxyCodeLine{11   \textcolor{keywordtype}{void} \mbox{\hyperlink{class_servo_ab220ecf228ea7b008227f21a64f06024}{initialize}}();}
+\DoxyCodeLine{12   \textcolor{keywordtype}{void} \mbox{\hyperlink{class_servo_a92f16edba5d71a28c9c2e4c6c5a85d8b}{setAngle}}(uint32\_t position\_deg, uint16\_t delay);}
+\DoxyCodeLine{13   \textcolor{keywordtype}{void} \mbox{\hyperlink{class_servo_a57e27f3e31877fda1cd1cfdc51f9ffd7}{update\_servo\_flag}}();}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15   \textcolor{keywordtype}{float} \mbox{\hyperlink{class_servo_a8593401c137d84d5b7441ee1170a5e56}{min\_pulse}} = 0.5; \textcolor{comment}{//ms}}
+\DoxyCodeLine{16   \textcolor{keywordtype}{float} \mbox{\hyperlink{class_servo_a56f97e404808990417678465edad6f4d}{max\_pulse}} = 2.5; \textcolor{comment}{//ms}}
+\DoxyCodeLine{17   uint16\_t \mbox{\hyperlink{class_servo_a8d3931e53fc29e85863aee341c24ee57}{max\_rot}} = 180; \textcolor{comment}{//degrees}}
+\DoxyCodeLine{18 }
+\DoxyCodeLine{19   uint16\_t \mbox{\hyperlink{class_servo_a519f0bf4bc63061fefc1463c8875f063}{flag}}; \textcolor{comment}{// used to indicate if servo is in motion}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21   \textcolor{keywordtype}{void} \mbox{\hyperlink{class_servo_aac6ead4264d2a4321ddf25e31f812b48}{startTimer}}(uint16\_t delay);}
+\DoxyCodeLine{22   \textcolor{keywordtype}{float} \mbox{\hyperlink{class_servo_ab6ca9274cd0d77b6a98b9f0fffb5959e}{elapsedTime}}();}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{keyword}{private}:}
+\DoxyCodeLine{25   TIM\_HandleTypeDef* htim;}
+\DoxyCodeLine{26   uint32\_t timer\_channel;}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28 }
+\DoxyCodeLine{29   \textcolor{comment}{//uint32\_t start\_time;}}
+\DoxyCodeLine{30 \};}
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

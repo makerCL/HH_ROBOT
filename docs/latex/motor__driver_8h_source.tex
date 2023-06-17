@@ -1,0 +1,39 @@
+\hypertarget{motor__driver_8h_source}{}\doxysection{motor\+\_\+driver.\+h}
+\label{motor__driver_8h_source}\index{Core/Inc/motor\_driver.h@{Core/Inc/motor\_driver.h}}
+\mbox{\hyperlink{motor__driver_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{ * motor\_driver.h}}
+\DoxyCodeLine{3 \textcolor{comment}{ *}}
+\DoxyCodeLine{4 \textcolor{comment}{ *  Created on: May 23, 2023}}
+\DoxyCodeLine{5 \textcolor{comment}{ *      Author: johna}}
+\DoxyCodeLine{6 \textcolor{comment}{ */}}
+\DoxyCodeLine{7 }
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#ifndef INC\_MOTOR\_DRIVER\_H\_}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#define INC\_MOTOR\_DRIVER\_H\_}}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include "{}stdint.h"{}}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include "{}stm32f4xx\_hal.h"{}}}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structmotor__drv}{motor\_drv}} \{}
+\DoxyCodeLine{15     int32\_t             \mbox{\hyperlink{structmotor__drv_abd9534a8da1637a3744895b1bad921f2}{pulse}};}
+\DoxyCodeLine{16     uint32\_t            \mbox{\hyperlink{structmotor__drv_a8df32cf39f0abf3638e737285edfa636}{chan\_1}};}
+\DoxyCodeLine{17     uint32\_t            \mbox{\hyperlink{structmotor__drv_a5869e9f891bf4c76fa60df46079d03ae}{chan\_2}};}
+\DoxyCodeLine{18     TIM\_HandleTypeDef*  \mbox{\hyperlink{structmotor__drv_a275760aef9ee01557fd601f0bc4e4f53}{htim}};}
+\DoxyCodeLine{19 \} \mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\_drv\_t}};}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{keywordtype}{void} \mbox{\hyperlink{motor__driver_8h_a7ab0af3ad83ac07373b9bd7c48247820}{enable}}(\mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}* \mbox{\hyperlink{structmotor__drv}{motor\_drv}});}
+\DoxyCodeLine{22 }
+\DoxyCodeLine{23 \textcolor{keywordtype}{void} \mbox{\hyperlink{motor__driver_8h_ac49a70531358457dd6fc7a0f0057ab83}{disable}}(\mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}* \mbox{\hyperlink{structmotor__drv}{motor\_drv}});}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 \textcolor{keywordtype}{void} \mbox{\hyperlink{motor__driver_8h_abc0148b71aa75ac4a9afa1045e6023be}{scaleNewPulse}}(\mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}* \mbox{\hyperlink{structmotor__drv}{motor\_drv}}, int8\_t val\_8);}
+\DoxyCodeLine{26 }
+\DoxyCodeLine{27 \textcolor{keywordtype}{void} \mbox{\hyperlink{motor__driver_8h_adb4f2c49bdce408e28c07722f9275ed9}{NewPulse}}(\mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}* \mbox{\hyperlink{structmotor__drv}{motor\_drv}}, int32\_t val\_32);}
+\DoxyCodeLine{28 }
+\DoxyCodeLine{29 \textcolor{keywordtype}{void} \mbox{\hyperlink{motor__driver_8h_ac9e027f21699129002facf32a9e65095}{setPWM}}(\mbox{\hyperlink{structmotor__drv}{motor\_drv\_t}}* \mbox{\hyperlink{structmotor__drv}{motor\_drv}});}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* INC\_MOTOR\_DRIVER\_H\_ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

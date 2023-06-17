@@ -1,0 +1,114 @@
+\hypertarget{motor__driver_8cpp}{}\doxysection{Core/\+Src/motor\+\_\+driver.cpp File Reference}
+\label{motor__driver_8cpp}\index{Core/Src/motor\_driver.cpp@{Core/Src/motor\_driver.cpp}}
+
+
+\+: motor driver  
+
+
+{\ttfamily \#include \char`\"{}motor\+\_\+driver.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{motor__driver_8cpp_a7ab0af3ad83ac07373b9bd7c48247820}{enable}} (\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Enables motor timer for a specified channel. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{motor__driver_8cpp_ac49a70531358457dd6fc7a0f0057ab83}{disable}} (\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Disables motor timer for a specified channel. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{motor__driver_8cpp_abc0148b71aa75ac4a9afa1045e6023be}{scale\+New\+Pulse}} (\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}, int8\+\_\+t val\+\_\+8)
+\begin{DoxyCompactList}\small\item\em Calculates the new pulse scaled from an int8\+\_\+t to be a value between the current pulse and the negative of that pulse. This function works best when using hex. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{motor__driver_8cpp_a2ef7464ea144e69739ecc9b08e02593b}{New\+Pulse}} (\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}, int32\+\_\+t PWM\+\_\+32)
+\begin{DoxyCompactList}\small\item\em Sets new pulse. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{motor__driver_8cpp_ac9e027f21699129002facf32a9e65095}{set\+PWM}} (\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$\mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}})
+\begin{DoxyCompactList}\small\item\em Sets up the PWM signal for the motors. Uses inverse PWM. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: motor driver 
+
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+\begin{DoxyAuthor}{Author}
+John Bennett 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{motor__driver_8cpp_ac49a70531358457dd6fc7a0f0057ab83}\label{motor__driver_8cpp_ac49a70531358457dd6fc7a0f0057ab83}} 
+\index{motor\_driver.cpp@{motor\_driver.cpp}!disable@{disable}}
+\index{disable@{disable}!motor\_driver.cpp@{motor\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{disable()}{disable()}}
+{\footnotesize\ttfamily void disable (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$}]{motor\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Disables motor timer for a specified channel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}} & motor driver structure. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{motor__driver_8cpp_a7ab0af3ad83ac07373b9bd7c48247820}\label{motor__driver_8cpp_a7ab0af3ad83ac07373b9bd7c48247820}} 
+\index{motor\_driver.cpp@{motor\_driver.cpp}!enable@{enable}}
+\index{enable@{enable}!motor\_driver.cpp@{motor\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{enable()}{enable()}}
+{\footnotesize\ttfamily void enable (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$}]{motor\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Enables motor timer for a specified channel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}} & motor driver structure. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{motor__driver_8cpp_a2ef7464ea144e69739ecc9b08e02593b}\label{motor__driver_8cpp_a2ef7464ea144e69739ecc9b08e02593b}} 
+\index{motor\_driver.cpp@{motor\_driver.cpp}!NewPulse@{NewPulse}}
+\index{NewPulse@{NewPulse}!motor\_driver.cpp@{motor\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{NewPulse()}{NewPulse()}}
+{\footnotesize\ttfamily void New\+Pulse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$}]{motor\+\_\+drv,  }\item[{int32\+\_\+t}]{PWM\+\_\+32 }\end{DoxyParamCaption})}
+
+
+
+Sets new pulse. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}} & motor driver structure. \\
+\hline
+{\em PWM\+\_\+32} & a 32 bit number to be set as the new pulse in \mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{motor__driver_8cpp_abc0148b71aa75ac4a9afa1045e6023be}\label{motor__driver_8cpp_abc0148b71aa75ac4a9afa1045e6023be}} 
+\index{motor\_driver.cpp@{motor\_driver.cpp}!scaleNewPulse@{scaleNewPulse}}
+\index{scaleNewPulse@{scaleNewPulse}!motor\_driver.cpp@{motor\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{scaleNewPulse()}{scaleNewPulse()}}
+{\footnotesize\ttfamily void scale\+New\+Pulse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$}]{motor\+\_\+drv,  }\item[{int8\+\_\+t}]{val\+\_\+8 }\end{DoxyParamCaption})}
+
+
+
+Calculates the new pulse scaled from an int8\+\_\+t to be a value between the current pulse and the negative of that pulse. This function works best when using hex. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}} & motor driver structure. \\
+\hline
+{\em val\+\_\+8} & an 8 bit number that will be scaled to represent the new pulse. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{motor__driver_8cpp_ac9e027f21699129002facf32a9e65095}\label{motor__driver_8cpp_ac9e027f21699129002facf32a9e65095}} 
+\index{motor\_driver.cpp@{motor\_driver.cpp}!setPWM@{setPWM}}
+\index{setPWM@{setPWM}!motor\_driver.cpp@{motor\_driver.cpp}}
+\doxysubsubsection{\texorpdfstring{setPWM()}{setPWM()}}
+{\footnotesize\ttfamily void set\+PWM (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{motor__driver_8h_aa9918ba162098a7741f52ced5b4c54f7}{motor\+\_\+drv\+\_\+t}} $\ast$}]{motor\+\_\+drv }\end{DoxyParamCaption})}
+
+
+
+Sets up the PWM signal for the motors. Uses inverse PWM. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \mbox{\hyperlink{structmotor__drv}{motor\+\_\+drv}}} & motor driver structure. \\
+\hline
+\end{DoxyParams}
