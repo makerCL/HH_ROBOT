@@ -1,3 +1,10 @@
+ /**
+  * @file           : apds9960.cpp
+  * @brief          : RGB sensor driver
+  *
+  * @attention
+  * @author Miles Alderman
+  */
 
 #include "APDS9960.h"
 	/**

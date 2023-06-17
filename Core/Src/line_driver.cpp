@@ -1,9 +1,10 @@
-/*
- * line_driver.c
- *
- *  Created on: May 31, 2023
- *      Author: johna
- */
+ /**
+  * @file           : line_driver.cpp
+  * @brief          : line driver
+  *
+  * @attention
+  * @author John Bennett
+  */
 
 #include "line_driver.h"
 #include "string.h"

@@ -1,9 +1,10 @@
-/*
- * encoder_driver.cpp
- *
- *  Created on: Jun 5, 2023
- *      Author: John Bennett
- */
+ /**
+  * @file           endoder_driver.cpp
+  * @brief          endoder driver for tracking encoder position
+  *
+  * @attention
+  * @author John Bennett
+  */
 
 #include "encoder_driver.h"
 #include "string.h"

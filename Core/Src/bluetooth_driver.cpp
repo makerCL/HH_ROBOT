@@ -1,9 +1,10 @@
-/*
- * bluetooth_driver.c
- *
- *  Created on: May 23, 2023
- *      Author: johna
- */
+ /**
+  * @file           : bluetooth_driver.cpp
+  * @brief          : bluetooth driver for deadman switch
+  *
+  * @attention
+  * @author John Bennett
+  */
 
 #include "bluetooth_driver.h"
 #include "string.h"

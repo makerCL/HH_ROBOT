@@ -1,9 +1,10 @@
-/*
- * motor_drive.c
- *
- *  Created on: May 23, 2023
- *      Author: John Bennett
- */
+ /**
+  * @file           : motor_driver.cpp
+  * @brief          : motor driver
+  *
+  * @attention
+  * @author John Bennett
+  */
 
 #include "motor_driver.h"
 

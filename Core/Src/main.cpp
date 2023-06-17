@@ -980,7 +980,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart){
  * We have two timers that cause interrupt triggers a second and a millisecond timer
  * This timer is used for printing not as quickly updating operation states and flags. As well as keeping track of the state of the deadman switch.
  *
- *
  * @param htim TIM handle.
  */
 // Callback: timer has rolled over

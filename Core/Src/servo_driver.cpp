@@ -1,3 +1,11 @@
+ /**
+  * @file           : servo_driver.cpp
+  * @brief          : servo driver
+  *
+  * @attention
+  * @author Miles Alderman
+  */
+
 #include "servo_driver.h"
 
 /**

@@ -1,9 +1,11 @@
-/*
- * navigation.cpp
- *
- *  Created on: Jun 13, 2023
- *      Author: John Bennett
- */
+ /**
+  * @file           : navigation.cpp
+  * @brief          : navigation driver
+  *
+  * @attention
+  * @author John Bennett
+  */
+
 
 
 
